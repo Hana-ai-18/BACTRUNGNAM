@@ -1,0 +1,2012 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ColdRoute AI — Vietnam Cold Chain Intelligence Platform</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════════════════
+   ROOT TOKENS
+═══════════════════════════════════════════════════════ */
+:root {
+  --bg: #050d0a;
+  --bg2: #0a1510;
+  --surface: #0f1f17;
+  --surface2: #162a1e;
+  --border: #1e3528;
+  --border-light: #2a4a38;
+  --green-neon: #00ff88;
+  --green-mid: #00cc6a;
+  --green-dark: #00804a;
+  --green-dim: rgba(0,255,136,0.08);
+  --green-glow: rgba(0,255,136,0.15);
+  --teal: #00d4aa;
+  --amber: #f5a623;
+  --red: #ff4757;
+  --blue: #4facfe;
+  --text: #e8f5ee;
+  --text-dim: #7aaa90;
+  --text-muted: #4a7060;
+  --white: #ffffff;
+  --font-display: 'Syne', sans-serif;
+  --font-body: 'DM Sans', sans-serif;
+  --radius: 12px;
+  --radius-lg: 20px;
+  --shadow-green: 0 0 30px rgba(0,255,136,0.12);
+  --shadow-card: 0 4px 24px rgba(0,0,0,0.4);
+  --transition: all 0.25s cubic-bezier(0.4,0,0.2,1);
+}
+
+/* ═══════════════════════════════════════════════════════
+   RESET & BASE
+═══════════════════════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: var(--font-body);
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+  line-height: 1.6;
+}
+
+/* ═══════════════════════════════════════════════════════
+   TOPBAR NAV
+═══════════════════════════════════════════════════════ */
+.topbar {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  height: 64px;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 2rem;
+  background: rgba(5,13,10,0.92);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+}
+.logo {
+  display: flex; align-items: center; gap: 10px;
+  font-family: var(--font-display);
+  font-size: 1.25rem; font-weight: 800;
+  text-decoration: none; color: var(--white);
+}
+.logo-icon {
+  width: 36px; height: 36px;
+  background: linear-gradient(135deg, var(--green-neon), var(--teal));
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.1rem;
+  box-shadow: 0 0 20px rgba(0,255,136,0.4);
+}
+.logo span { color: var(--green-neon); }
+.nav-links {
+  display: flex; gap: 2px;
+  list-style: none;
+}
+.nav-links li a {
+  display: block; padding: 6px 14px;
+  color: var(--text-dim); font-size: 0.875rem; font-weight: 500;
+  text-decoration: none; border-radius: 6px;
+  transition: var(--transition);
+}
+.nav-links li a:hover, .nav-links li a.active {
+  color: var(--green-neon); background: var(--green-dim);
+}
+.nav-right { display: flex; align-items: center; gap: 12px; }
+.green-badge {
+  display: flex; align-items: center; gap: 6px;
+  background: rgba(0,255,136,0.1); border: 1px solid rgba(0,255,136,0.3);
+  border-radius: 20px; padding: 4px 12px;
+  font-size: 0.75rem; font-weight: 600; color: var(--green-neon);
+}
+.green-badge::before { content: ""; width: 6px; height: 6px; background: var(--green-neon); border-radius: 50%; animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(1.3)} }
+.btn { display: inline-flex; align-items: center; gap: 8px; padding: 8px 18px; border-radius: 8px; font-size: 0.875rem; font-weight: 600; cursor: pointer; transition: var(--transition); border: none; text-decoration: none; font-family: var(--font-body); }
+.btn-primary { background: var(--green-neon); color: #000; }
+.btn-primary:hover { background: var(--green-mid); transform: translateY(-1px); box-shadow: 0 8px 24px rgba(0,255,136,0.3); }
+.btn-outline { background: transparent; border: 1px solid var(--border-light); color: var(--text); }
+.btn-outline:hover { border-color: var(--green-neon); color: var(--green-neon); }
+.btn-sm { padding: 6px 14px; font-size: 0.8rem; }
+
+/* ═══════════════════════════════════════════════════════
+   MAIN LAYOUT
+═══════════════════════════════════════════════════════ */
+.app-layout { display: flex; min-height: 100vh; padding-top: 64px; }
+.sidebar {
+  width: 260px; flex-shrink: 0;
+  background: var(--bg2);
+  border-right: 1px solid var(--border);
+  padding: 1.5rem 1rem;
+  position: fixed; top: 64px; bottom: 0; left: 0;
+  overflow-y: auto;
+  z-index: 50;
+}
+.main-content { margin-left: 260px; flex: 1; min-height: calc(100vh - 64px); }
+
+.sidebar-section { margin-bottom: 2rem; }
+.sidebar-label { font-size: 0.7rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; padding: 0 8px; margin-bottom: 6px; }
+.sidebar-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 10px; border-radius: 8px;
+  cursor: pointer; transition: var(--transition);
+  color: var(--text-dim); font-size: 0.875rem;
+  margin-bottom: 2px;
+}
+.sidebar-item:hover { background: var(--green-dim); color: var(--text); }
+.sidebar-item.active { background: var(--green-dim); color: var(--green-neon); border: 1px solid rgba(0,255,136,0.2); }
+.sidebar-item .icon { font-size: 1rem; width: 20px; text-align: center; }
+.sidebar-badge { margin-left: auto; background: var(--green-dark); color: var(--green-neon); font-size: 0.65rem; font-weight: 700; padding: 2px 6px; border-radius: 10px; }
+.sidebar-badge.red { background: rgba(255,71,87,0.2); color: var(--red); }
+
+/* ═══════════════════════════════════════════════════════
+   PAGES (sections)
+═══════════════════════════════════════════════════════ */
+.page { display: none; animation: fadeUp 0.3s ease; }
+.page.active { display: block; }
+@keyframes fadeUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+
+/* ═══════════════════════════════════════════════════════
+   HERO / DASHBOARD
+═══════════════════════════════════════════════════════ */
+.hero {
+  position: relative;
+  padding: 3rem 2.5rem 2rem;
+  background: linear-gradient(135deg, #050d0a 0%, #0a1a10 50%, #061208 100%);
+  border-bottom: 1px solid var(--border);
+  overflow: hidden;
+}
+.hero::before {
+  content: "";
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse 60% 50% at 80% 50%, rgba(0,255,136,0.06) 0%, transparent 70%);
+  pointer-events: none;
+}
+.hero-grid { display: grid; grid-template-columns: 1fr auto; gap: 2rem; align-items: center; }
+.hero-tag { display: inline-flex; align-items: center; gap: 6px; background: rgba(0,255,136,0.1); border: 1px solid rgba(0,255,136,0.25); border-radius: 20px; padding: 4px 12px; font-size: 0.75rem; font-weight: 600; color: var(--green-neon); margin-bottom: 1rem; }
+.hero h1 { font-family: var(--font-display); font-size: 2.2rem; font-weight: 800; line-height: 1.15; margin-bottom: 0.75rem; }
+.hero h1 .accent { color: var(--green-neon); }
+.hero p { color: var(--text-dim); font-size: 1rem; max-width: 520px; }
+.hero-actions { display: flex; gap: 12px; margin-top: 1.5rem; }
+.hero-stat-row { display: grid; grid-template-columns: repeat(4,1fr); gap: 1rem; margin-top: 2.5rem; }
+.hero-stat {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 1.25rem 1.5rem;
+  transition: var(--transition);
+}
+.hero-stat:hover { border-color: var(--border-light); transform: translateY(-2px); }
+.hero-stat .value { font-family: var(--font-display); font-size: 2rem; font-weight: 800; color: var(--green-neon); }
+.hero-stat .label { font-size: 0.8rem; color: var(--text-dim); margin-top: 2px; }
+.hero-stat .change { font-size: 0.75rem; color: #00cc6a; margin-top: 4px; }
+
+/* ═══════════════════════════════════════════════════════
+   CARDS & GRID
+═══════════════════════════════════════════════════════ */
+.content-area { padding: 2rem 2.5rem; }
+.section-title { font-family: var(--font-display); font-size: 1.3rem; font-weight: 700; margin-bottom: 1.25rem; display: flex; align-items: center; gap: 10px; }
+.section-title .dot { width: 8px; height: 8px; background: var(--green-neon); border-radius: 50%; box-shadow: 0 0 8px var(--green-neon); }
+.card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); padding: 1.5rem;
+  transition: var(--transition);
+}
+.card:hover { border-color: var(--border-light); box-shadow: var(--shadow-card); }
+.card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem; }
+.card-title { font-family: var(--font-display); font-size: 1rem; font-weight: 700; }
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+.grid-3 { display: grid; grid-template-columns: repeat(3,1fr); gap: 1.5rem; }
+.grid-4 { display: grid; grid-template-columns: repeat(4,1fr); gap: 1rem; }
+
+/* ═══════════════════════════════════════════════════════
+   MAP VIEW
+═══════════════════════════════════════════════════════ */
+.map-container {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); overflow: hidden;
+  height: 480px; position: relative;
+}
+.map-svg-wrap { width: 100%; height: 100%; position: relative; }
+.map-toolbar {
+  position: absolute; top: 12px; left: 12px; z-index: 10;
+  display: flex; gap: 8px;
+}
+.map-btn {
+  background: rgba(5,13,10,0.9); border: 1px solid var(--border);
+  border-radius: 8px; padding: 6px 12px; color: var(--text-dim);
+  font-size: 0.75rem; font-weight: 600; cursor: pointer;
+  transition: var(--transition);
+}
+.map-btn:hover, .map-btn.active { border-color: var(--green-neon); color: var(--green-neon); }
+.map-legend {
+  position: absolute; bottom: 12px; right: 12px; z-index: 10;
+  background: rgba(5,13,10,0.9); border: 1px solid var(--border);
+  border-radius: 10px; padding: 12px 14px;
+}
+.legend-item { display: flex; align-items: center; gap: 8px; font-size: 0.75rem; color: var(--text-dim); margin-bottom: 6px; }
+.legend-item:last-child { margin-bottom: 0; }
+.legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+
+/* ═══════════════════════════════════════════════════════
+   ROUTE OPTIMIZER PANEL
+═══════════════════════════════════════════════════════ */
+.optimizer-form {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); padding: 1.75rem;
+}
+.form-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+.form-group { display: flex; flex-direction: column; gap: 6px; }
+.form-label { font-size: 0.75rem; font-weight: 600; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.05em; }
+.form-control {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 8px; padding: 10px 12px;
+  color: var(--text); font-size: 0.875rem; font-family: var(--font-body);
+  transition: var(--transition); width: 100%;
+}
+.form-control:focus { outline: none; border-color: var(--green-neon); box-shadow: 0 0 0 3px rgba(0,255,136,0.1); }
+.form-control option { background: var(--surface); }
+.toggle-row { display: flex; align-items: center; gap: 12px; margin-bottom: 1.25rem; }
+.toggle-label { font-size: 0.875rem; color: var(--text-dim); }
+.toggle { position: relative; width: 44px; height: 24px; }
+.toggle input { opacity: 0; width: 0; height: 0; }
+.toggle-slider {
+  position: absolute; inset: 0; background: var(--border); border-radius: 12px;
+  cursor: pointer; transition: var(--transition);
+}
+.toggle-slider::before {
+  content: ""; position: absolute; width: 18px; height: 18px;
+  background: var(--text-dim); border-radius: 50%;
+  top: 3px; left: 3px; transition: var(--transition);
+}
+.toggle input:checked + .toggle-slider { background: var(--green-dark); }
+.toggle input:checked + .toggle-slider::before { transform: translateX(20px); background: var(--green-neon); }
+
+/* Route result cards */
+.route-results { margin-top: 1.5rem; }
+.route-card {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 1.25rem;
+  margin-bottom: 1rem; transition: var(--transition);
+  position: relative; overflow: hidden;
+}
+.route-card:hover { border-color: var(--border-light); }
+.route-card.recommended { border-color: rgba(0,255,136,0.4); }
+.route-card.recommended::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, var(--green-neon), var(--teal)); }
+.route-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 0.7rem; font-weight: 700; padding: 3px 8px; border-radius: 6px;
+}
+.badge-green { background: rgba(0,255,136,0.15); color: var(--green-neon); border: 1px solid rgba(0,255,136,0.3); }
+.badge-amber { background: rgba(245,166,35,0.15); color: var(--amber); border: 1px solid rgba(245,166,35,0.3); }
+.badge-blue { background: rgba(79,172,254,0.15); color: var(--blue); border: 1px solid rgba(79,172,254,0.3); }
+.badge-red { background: rgba(255,71,87,0.15); color: var(--red); border: 1px solid rgba(255,71,87,0.3); }
+.route-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 1rem; }
+.route-name { font-family: var(--font-display); font-size: 0.95rem; font-weight: 700; margin-bottom: 4px; }
+.route-badges { display: flex; gap: 6px; flex-wrap: wrap; }
+.route-legs { display: flex; align-items: center; gap: 8px; margin-bottom: 1rem; flex-wrap: wrap; }
+.leg {
+  display: flex; align-items: center; gap: 6px;
+  background: var(--surface); border-radius: 8px; padding: 8px 12px;
+  font-size: 0.8rem;
+}
+.leg-icon { font-size: 1rem; }
+.leg-info { }
+.leg-mode { font-weight: 600; color: var(--text); }
+.leg-detail { color: var(--text-dim); font-size: 0.75rem; }
+.leg-arrow { color: var(--text-muted); }
+.route-metrics { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; }
+.metric { }
+.metric-val { font-family: var(--font-display); font-weight: 700; font-size: 1.1rem; }
+.metric-val.green { color: var(--green-neon); }
+.metric-val.amber { color: var(--amber); }
+.metric-label { font-size: 0.72rem; color: var(--text-dim); }
+
+/* Green score ring */
+.green-score-ring { width: 64px; height: 64px; position: relative; flex-shrink: 0; }
+.green-score-ring svg { width: 64px; height: 64px; transform: rotate(-90deg); }
+.green-score-ring .ring-bg { fill: none; stroke: var(--border); stroke-width: 6; }
+.green-score-ring .ring-fill { fill: none; stroke-width: 6; stroke-linecap: round; transition: stroke-dashoffset 1s ease; }
+.green-score-ring .ring-text { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-family: var(--font-display); font-weight: 800; font-size: 0.95rem; }
+
+/* ═══════════════════════════════════════════════════════
+   ORDER MATCHING
+═══════════════════════════════════════════════════════ */
+.order-table { width: 100%; border-collapse: collapse; }
+.order-table th { text-align: left; font-size: 0.72rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; padding: 10px 12px; border-bottom: 1px solid var(--border); }
+.order-table td { padding: 12px 12px; border-bottom: 1px solid var(--border); font-size: 0.875rem; vertical-align: middle; }
+.order-table tr:last-child td { border-bottom: none; }
+.order-table tr:hover td { background: rgba(255,255,255,0.02); }
+.status-pill { display: inline-flex; align-items: center; gap: 5px; padding: 3px 10px; border-radius: 20px; font-size: 0.72rem; font-weight: 700; }
+.status-stored { background: rgba(0,255,136,0.1); color: var(--green-neon); }
+.status-transit { background: rgba(79,172,254,0.1); color: var(--blue); }
+.status-pending { background: rgba(245,166,35,0.1); color: var(--amber); }
+.status-matching { background: rgba(0,212,170,0.1); color: var(--teal); }
+
+/* Match group cards */
+.match-group {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 1.25rem;
+  margin-bottom: 1rem;
+}
+.match-group.viable { border-color: rgba(0,255,136,0.3); }
+.match-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
+.fill-bar { background: var(--border); border-radius: 4px; height: 8px; overflow: hidden; flex: 1; margin: 0 12px; }
+.fill-bar-inner { height: 100%; border-radius: 4px; background: linear-gradient(90deg, var(--green-dark), var(--green-neon)); transition: width 0.8s ease; }
+.match-orders { display: flex; flex-direction: column; gap: 6px; }
+.match-order-item {
+  display: flex; align-items: center; gap: 10px;
+  background: var(--surface); border-radius: 6px; padding: 8px 12px;
+  font-size: 0.8rem;
+}
+.compat-tag { font-size: 0.68rem; padding: 2px 6px; border-radius: 4px; font-weight: 600; }
+.compat-ok { background: rgba(0,255,136,0.1); color: var(--green-neon); }
+.compat-warn { background: rgba(255,71,87,0.1); color: var(--red); }
+
+/* ═══════════════════════════════════════════════════════
+   CONGESTION ALERTS
+═══════════════════════════════════════════════════════ */
+.alert-card {
+  background: var(--bg2); border-left: 3px solid;
+  border-radius: var(--radius); padding: 1rem 1.25rem;
+  margin-bottom: 0.75rem; display: flex; gap: 1rem; align-items: flex-start;
+}
+.alert-card.critical { border-color: var(--red); }
+.alert-card.warning { border-color: var(--amber); }
+.alert-card.info { border-color: var(--blue); }
+.alert-icon { font-size: 1.25rem; flex-shrink: 0; }
+.alert-content { flex: 1; }
+.alert-title { font-weight: 600; font-size: 0.875rem; margin-bottom: 3px; }
+.alert-desc { font-size: 0.8rem; color: var(--text-dim); }
+.alert-action { margin-top: 8px; }
+
+/* ═══════════════════════════════════════════════════════
+   WAREHOUSE GRID
+═══════════════════════════════════════════════════════ */
+.warehouse-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 1.25rem;
+  transition: var(--transition);
+}
+.warehouse-card:hover { border-color: var(--border-light); transform: translateY(-2px); box-shadow: var(--shadow-card); }
+.wh-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 1rem; }
+.wh-name { font-weight: 700; font-size: 0.9rem; margin-bottom: 3px; }
+.wh-location { font-size: 0.75rem; color: var(--text-muted); }
+.wh-type { font-size: 0.68rem; font-weight: 700; padding: 3px 8px; border-radius: 6px; }
+.type-hub { background: rgba(79,172,254,0.1); color: var(--blue); }
+.type-farm { background: rgba(0,255,136,0.1); color: var(--green-neon); }
+.type-port { background: rgba(0,212,170,0.1); color: var(--teal); }
+.wh-fill { margin-bottom: 12px; }
+.wh-fill-label { display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-dim); margin-bottom: 4px; }
+.capacity-bar { background: var(--border); border-radius: 4px; height: 6px; overflow: hidden; }
+.capacity-bar-inner { height: 100%; border-radius: 4px; background: linear-gradient(90deg, var(--green-dark), var(--green-neon)); }
+.capacity-bar-inner.warn { background: linear-gradient(90deg, #c45c00, var(--amber)); }
+.capacity-bar-inner.critical { background: linear-gradient(90deg, #8b0000, var(--red)); }
+.wh-meta { display: flex; gap: 12px; flex-wrap: wrap; }
+.wh-meta-item { font-size: 0.75rem; color: var(--text-dim); display: flex; align-items: center; gap: 4px; }
+.solar-icon { color: var(--amber); }
+.green-score-pill {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 0.72rem; font-weight: 700; padding: 3px 8px; border-radius: 8px;
+}
+.gs-high { background: rgba(0,255,136,0.12); color: var(--green-neon); }
+.gs-mid { background: rgba(245,166,35,0.12); color: var(--amber); }
+.gs-low { background: rgba(255,71,87,0.12); color: var(--red); }
+
+/* ═══════════════════════════════════════════════════════
+   VESSEL SCHEDULE TABLE
+═══════════════════════════════════════════════════════ */
+.vessel-row { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem 1.25rem; margin-bottom: 0.75rem; display: grid; grid-template-columns: 2fr 1.5fr 1fr 1fr 1fr 1fr 1fr auto; gap: 1rem; align-items: center; transition: var(--transition); }
+.vessel-row:hover { border-color: var(--border-light); }
+.vessel-name { font-weight: 700; font-size: 0.875rem; }
+.vessel-carrier { font-size: 0.75rem; color: var(--text-muted); }
+.vessel-route { font-size: 0.8rem; color: var(--text-dim); }
+.vessel-date { font-size: 0.8rem; font-weight: 600; }
+.slots-indicator { display: flex; align-items: center; gap: 6px; }
+.slots-bar { flex: 1; max-width: 60px; background: var(--border); border-radius: 3px; height: 5px; overflow: hidden; }
+.slots-bar-inner { height: 100%; background: var(--green-mid); border-radius: 3px; }
+.vessel-status { font-size: 0.72rem; font-weight: 700; padding: 3px 8px; border-radius: 6px; }
+.vs-ontime { background: rgba(0,255,136,0.1); color: var(--green-neon); }
+.vs-delayed { background: rgba(245,166,35,0.1); color: var(--amber); }
+
+/* ═══════════════════════════════════════════════════════
+   GREEN METRICS
+═══════════════════════════════════════════════════════ */
+.carbon-donut { position: relative; width: 160px; height: 160px; flex-shrink: 0; }
+.carbon-donut svg { width: 160px; height: 160px; }
+.carbon-donut .center-text { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.carbon-donut .big-num { font-family: var(--font-display); font-size: 2rem; font-weight: 800; color: var(--green-neon); }
+.carbon-donut .sub-txt { font-size: 0.65rem; color: var(--text-muted); text-align: center; }
+
+.impact-card {
+  background: linear-gradient(135deg, rgba(0,255,136,0.06), rgba(0,212,170,0.04));
+  border: 1px solid rgba(0,255,136,0.2); border-radius: var(--radius-lg); padding: 1.75rem;
+  text-align: center;
+}
+.impact-number { font-family: var(--font-display); font-size: 3rem; font-weight: 800; color: var(--green-neon); }
+.impact-unit { font-size: 0.875rem; color: var(--text-dim); margin-bottom: 4px; }
+.impact-desc { font-size: 0.8rem; color: var(--text-muted); }
+.impact-icon { font-size: 2.5rem; margin-bottom: 0.5rem; }
+
+/* ═══════════════════════════════════════════════════════
+   AI ASSISTANT PANEL
+═══════════════════════════════════════════════════════ */
+.ai-panel {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); overflow: hidden;
+  display: flex; flex-direction: column; height: 520px;
+}
+.ai-header {
+  padding: 1rem 1.25rem; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 10px;
+  background: linear-gradient(90deg, rgba(0,255,136,0.05), transparent);
+}
+.ai-avatar { width: 32px; height: 32px; background: linear-gradient(135deg, var(--green-neon), var(--teal)); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1rem; }
+.ai-name { font-weight: 700; font-size: 0.9rem; }
+.ai-sub { font-size: 0.72rem; color: var(--text-dim); }
+.ai-messages { flex: 1; overflow-y: auto; padding: 1.25rem; display: flex; flex-direction: column; gap: 12px; }
+.ai-messages::-webkit-scrollbar { width: 4px; }
+.ai-messages::-webkit-scrollbar-track { background: transparent; }
+.ai-messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+.msg { display: flex; gap: 10px; max-width: 85%; }
+.msg.user { align-self: flex-end; flex-direction: row-reverse; }
+.msg-bubble {
+  padding: 10px 14px; border-radius: 14px;
+  font-size: 0.855rem; line-height: 1.5;
+}
+.msg.ai .msg-bubble { background: var(--surface2); border: 1px solid var(--border); border-radius: 4px 14px 14px 14px; }
+.msg.user .msg-bubble { background: var(--green-dark); color: var(--text); border-radius: 14px 4px 14px 14px; }
+.msg-avatar { width: 28px; height: 28px; border-radius: 7px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; }
+.msg.ai .msg-avatar { background: linear-gradient(135deg, var(--green-neon), var(--teal)); }
+.msg.user .msg-avatar { background: var(--surface2); }
+.ai-input-row {
+  padding: 1rem 1.25rem; border-top: 1px solid var(--border);
+  display: flex; gap: 10px;
+}
+.ai-input { flex: 1; background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 10px 14px; color: var(--text); font-size: 0.875rem; font-family: var(--font-body); resize: none; height: 44px; }
+.ai-input:focus { outline: none; border-color: var(--green-neon); }
+.ai-send { width: 44px; height: 44px; background: var(--green-neon); border: none; border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1rem; transition: var(--transition); flex-shrink: 0; }
+.ai-send:hover { background: var(--green-mid); }
+.ai-suggestions { padding: 0 1.25rem 0.75rem; display: flex; gap: 6px; flex-wrap: wrap; }
+.ai-suggestion-btn {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 16px; padding: 5px 12px; font-size: 0.75rem;
+  color: var(--text-dim); cursor: pointer; transition: var(--transition);
+  font-family: var(--font-body);
+}
+.ai-suggestion-btn:hover { border-color: var(--green-neon); color: var(--green-neon); }
+
+/* ═══════════════════════════════════════════════════════
+   BACKHAUL / TRUCK
+═══════════════════════════════════════════════════════ */
+.backhaul-card {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 1rem 1.25rem;
+  margin-bottom: 0.75rem; display: flex; align-items: center; gap: 1rem;
+  transition: var(--transition);
+}
+.backhaul-card:hover { border-color: var(--green-neon); }
+.truck-icon { font-size: 1.75rem; }
+.bh-info { flex: 1; }
+.bh-route { font-weight: 700; font-size: 0.875rem; margin-bottom: 2px; }
+.bh-sub { font-size: 0.75rem; color: var(--text-dim); }
+.bh-earning { text-align: right; }
+.bh-amount { font-family: var(--font-display); font-size: 1.1rem; font-weight: 800; color: var(--green-neon); }
+.bh-co2 { font-size: 0.72rem; color: var(--teal); }
+
+/* ═══════════════════════════════════════════════════════
+   LOADING STATES
+═══════════════════════════════════════════════════════ */
+.loading { display: flex; align-items: center; justify-content: center; padding: 3rem; gap: 12px; color: var(--text-dim); }
+.spinner { width: 24px; height: 24px; border: 2px solid var(--border); border-top-color: var(--green-neon); border-radius: 50%; animation: spin 0.8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.thinking-dots { display: inline-flex; gap: 4px; }
+.thinking-dots span { width: 6px; height: 6px; background: var(--green-neon); border-radius: 50%; animation: dot-bounce 1.2s infinite; }
+.thinking-dots span:nth-child(2) { animation-delay: 0.2s; }
+.thinking-dots span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes dot-bounce { 0%,80%,100%{transform:scale(0.6);opacity:0.4} 40%{transform:scale(1);opacity:1} }
+
+/* ═══════════════════════════════════════════════════════
+   TABS
+═══════════════════════════════════════════════════════ */
+.tab-row { display: flex; gap: 4px; border-bottom: 1px solid var(--border); margin-bottom: 1.5rem; }
+.tab-btn { padding: 8px 16px; font-size: 0.875rem; font-weight: 600; color: var(--text-muted); cursor: pointer; border: none; background: transparent; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: var(--transition); font-family: var(--font-body); }
+.tab-btn:hover { color: var(--text); }
+.tab-btn.active { color: var(--green-neon); border-bottom-color: var(--green-neon); }
+
+/* ═══════════════════════════════════════════════════════
+   RESPONSIVE
+═══════════════════════════════════════════════════════ */
+@media (max-width: 1024px) {
+  .grid-3 { grid-template-columns: 1fr 1fr; }
+  .hero-stat-row { grid-template-columns: 1fr 1fr; }
+  .route-metrics { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 768px) {
+  .sidebar { width: 60px; }
+  .sidebar .sidebar-item span { display: none; }
+  .sidebar .sidebar-label { display: none; }
+  .sidebar .sidebar-badge { display: none; }
+  .main-content { margin-left: 60px; }
+  .nav-links { display: none; }
+  .hero h1 { font-size: 1.5rem; }
+  .grid-2 { grid-template-columns: 1fr; }
+  .form-row { grid-template-columns: 1fr; }
+  .vessel-row { grid-template-columns: 1fr 1fr; }
+}
+
+/* ═══════════════════════════════════════════════════════
+   SCROLLBAR
+═══════════════════════════════════════════════════════ */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--border-light); }
+
+/* ═══════════════════════════════════════════════════════
+   MISC
+═══════════════════════════════════════════════════════ */
+.divider { border: none; border-top: 1px solid var(--border); margin: 1.5rem 0; }
+.chip { display: inline-block; background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; padding: 3px 8px; font-size: 0.72rem; color: var(--text-dim); }
+.text-green { color: var(--green-neon); }
+.text-amber { color: var(--amber); }
+.text-red { color: var(--red); }
+.text-dim { color: var(--text-dim); }
+.text-muted { color: var(--text-muted); }
+.fw-700 { font-weight: 700; }
+.mt-1 { margin-top: 0.5rem; }
+.mt-2 { margin-top: 1rem; }
+.flex { display: flex; }
+.flex-center { display: flex; align-items: center; }
+.gap-8 { gap: 8px; }
+.gap-12 { gap: 12px; }
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════ TOPBAR ══════════════════════ -->
+<header class="topbar">
+  <a href="#" class="logo" onclick="showPage('dashboard')">
+    <div class="logo-icon">🧊</div>
+    ColdRoute<span>AI</span>
+  </a>
+  <nav>
+    <ul class="nav-links">
+      <li><a href="#" onclick="showPage('dashboard')" id="nav-dashboard" class="active">Dashboard</a></li>
+      <li><a href="#" onclick="showPage('optimizer')" id="nav-optimizer">Route Optimizer</a></li>
+      <li><a href="#" onclick="showPage('orders')" id="nav-orders">Order Matching</a></li>
+      <li><a href="#" onclick="showPage('warehouses')" id="nav-warehouses">Cold Network</a></li>
+      <li><a href="#" onclick="showPage('vessels')" id="nav-vessels">Vessel Schedule</a></li>
+      <li><a href="#" onclick="showPage('green')" id="nav-green">Green Impact</a></li>
+    </ul>
+  </nav>
+  <div class="nav-right">
+    <div class="green-badge">🌿 Carbon Neutral Certified</div>
+    <button class="btn btn-primary btn-sm" onclick="showPage('optimizer')">📦 Ship Now</button>
+  </div>
+</header>
+
+<!-- ══════════════════════ SIDEBAR ══════════════════════ -->
+<div class="app-layout">
+<aside class="sidebar">
+  <div class="sidebar-section">
+    <div class="sidebar-label">Main</div>
+    <div class="sidebar-item active" onclick="showPage('dashboard')"><span class="icon">📊</span><span>Dashboard</span></div>
+    <div class="sidebar-item" onclick="showPage('optimizer')"><span class="icon">🗺️</span><span>Route Optimizer</span></div>
+    <div class="sidebar-item" onclick="showPage('orders')"><span class="icon">🔗</span><span>Order Matching</span><span class="sidebar-badge">3</span></div>
+    <div class="sidebar-item" onclick="showPage('vessels')"><span class="icon">🚢</span><span>Vessel Schedule</span></div>
+  </div>
+  <div class="sidebar-section">
+    <div class="sidebar-label">Network</div>
+    <div class="sidebar-item" onclick="showPage('warehouses')"><span class="icon">🏭</span><span>Cold Warehouses</span></div>
+    <div class="sidebar-item" onclick="showPage('green')"><span class="icon">🌿</span><span>Green Impact</span></div>
+    <div class="sidebar-item" onclick="showPage('alerts')"><span class="icon">⚠️</span><span>Alerts</span><span class="sidebar-badge red">2</span></div>
+    <div class="sidebar-item" onclick="showPage('backhaul')"><span class="icon">🔄</span><span>Backhaul Match</span></div>
+  </div>
+  <div class="sidebar-section">
+    <div class="sidebar-label">AI Tools</div>
+    <div class="sidebar-item" onclick="showPage('assistant')"><span class="icon">🤖</span><span>AI Assistant</span></div>
+  </div>
+  <div class="sidebar-item" onclick="showPage('tracker')">
+    <span class="icon">🛰️</span><span>Live Tracker</span>
+    <span class="sidebar-badge">3</span>
+  </div>
+</aside>
+
+<!-- ══════════════════════ MAIN CONTENT ══════════════════════ -->
+<main class="main-content">
+
+<!-- ─────── DASHBOARD PAGE ─────── -->
+<div id="page-dashboard" class="page active">
+  <div class="hero">
+    <div class="hero-grid">
+      <div>
+        <div class="hero-tag">🌏 Vietnam Cold Chain Intelligence</div>
+        <h1>Move <span class="accent">Smarter.</span><br>Ship <span class="accent">Greener.</span></h1>
+        <p>The AI-powered cold chain platform connecting farm buffers, reefer trucks, and vessels into one intelligent green logistics network across Vietnam.</p>
+        <div class="hero-actions">
+          <button class="btn btn-primary" onclick="showPage('optimizer')">🗺️ Optimize My Route</button>
+          <button class="btn btn-outline" onclick="showPage('orders')">🔗 Match Orders</button>
+        </div>
+      </div>
+      <div style="text-align:center; opacity:0.15; font-size:9rem; user-select:none;">🧊</div>
+    </div>
+    <div class="hero-stat-row">
+      <div class="hero-stat">
+        <div class="value">248</div>
+        <div class="label">Connected Cold Warehouses</div>
+        <div class="change">↑ 23 new this quarter</div>
+      </div>
+      <div class="hero-stat">
+        <div class="value">34%</div>
+        <div class="label">Avg CO₂ Reduction</div>
+        <div class="change">↑ vs standard logistics</div>
+      </div>
+      <div class="hero-stat">
+        <div class="value">4,821</div>
+        <div class="label">Orders This Month</div>
+        <div class="change">↑ 18% from last month</div>
+      </div>
+      <div class="hero-stat">
+        <div class="value">94.2%</div>
+        <div class="label">On-Time Delivery Rate</div>
+        <div class="change">↑ 2.1% improvement</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="content-area">
+    <div class="grid-2" style="margin-bottom:1.5rem">
+      <!-- Network Map -->
+      <div class="card" style="grid-column: 1 / -1;">
+        <div class="card-header">
+          <div class="card-title">🗺️ Live Cold Chain Network — Vietnam</div>
+          <div style="display:flex;gap:8px;">
+            <button class="map-btn active" onclick="setMapView('all')">All</button>
+            <button class="map-btn" onclick="setMapView('warehouses')">Warehouses</button>
+            <button class="map-btn" onclick="setMapView('routes')">Routes</button>
+          </div>
+        </div>
+        <div class="map-container" style="height:400px;position:relative;">
+          <svg id="vietnam-map" viewBox="0 0 520 600" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;background:linear-gradient(180deg,#051510 0%,#061208 100%);">
+            <!-- Vietnam outline simplified -->
+            <defs>
+              <filter id="glow"><feGaussianBlur stdDeviation="3" result="coloredBlur"/><feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+              <radialGradient id="seaGrad" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#0a1f2a"/><stop offset="100%" stop-color="#050d14"/></radialGradient>
+              <linearGradient id="routeGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#00ff88" stop-opacity="0.8"/><stop offset="100%" stop-color="#00d4aa" stop-opacity="0.3"/></linearGradient>
+            </defs>
+            <!-- Sea background -->
+            <rect width="520" height="600" fill="url(#seaGrad)"/>
+            <!-- Vietnam land mass (simplified polygon) -->
+            <path d="M240,10 L280,20 L310,40 L330,70 L320,100 L340,130 L360,160 L370,190 L360,220 L380,250 L400,280 L410,310 L400,340 L380,360 L370,390 L360,420 L340,450 L310,470 L280,480 L260,500 L240,510 L220,490 L200,460 L190,430 L200,400 L190,370 L180,340 L190,310 L200,280 L180,250 L170,220 L180,190 L200,170 L210,140 L200,110 L210,80 L230,50 Z"
+              fill="#0f2a1a" stroke="#1a4030" stroke-width="1.5"/>
+            <!-- Grid lines (sea) -->
+            <g stroke="#0a1f1a" stroke-width="0.5" opacity="0.5">
+              <line x1="0" y1="100" x2="520" y2="100"/><line x1="0" y1="200" x2="520" y2="200"/>
+              <line x1="0" y1="300" x2="520" y2="300"/><line x1="0" y1="400" x2="520" y2="400"/>
+              <line x1="0" y1="500" x2="520" y2="500"/>
+              <line x1="100" y1="0" x2="100" y2="600"/><line x1="200" y1="0" x2="200" y2="600"/>
+              <line x1="300" y1="0" x2="300" y2="600"/><line x1="400" y1="0" x2="400" y2="600"/>
+            </g>
+            
+            <!-- Shipping routes (animated) -->
+            <!-- SGN to Singapore -->
+            <line x1="340" y1="430" x2="460" y2="520" stroke="#00ff88" stroke-width="1.5" stroke-dasharray="6,4" opacity="0.5">
+              <animate attributeName="stroke-dashoffset" from="0" to="-20" dur="1.5s" repeatCount="indefinite"/>
+            </line>
+            <!-- SGN to Shanghai (North) -->
+            <path d="M340,430 Q420,300 460,100" stroke="#00d4aa" stroke-width="1.5" fill="none" stroke-dasharray="8,4" opacity="0.4">
+              <animate attributeName="stroke-dashoffset" from="0" to="-24" dur="2s" repeatCount="indefinite"/>
+            </path>
+            <!-- HPH to Shanghai -->
+            <path d="M255,85 Q370,60 460,30" stroke="#4facfe" stroke-width="1.5" fill="none" stroke-dasharray="6,4" opacity="0.4">
+              <animate attributeName="stroke-dashoffset" from="0" to="-20" dur="1.8s" repeatCount="indefinite"/>
+            </path>
+            <!-- SGN to Rotterdam (long haul) -->
+            <path d="M340,430 Q480,380 510,200" stroke="#f5a623" stroke-width="1" fill="none" stroke-dasharray="4,6" opacity="0.3">
+              <animate attributeName="stroke-dashoffset" from="0" to="-20" dur="3s" repeatCount="indefinite"/>
+            </path>
+
+            <!-- Road connections farm-to-port -->
+            <line x1="230" y1="410" x2="340" y2="430" stroke="#00804a" stroke-width="1" stroke-dasharray="4,3" opacity="0.6"/>
+            <line x1="200" y1="440" x2="340" y2="430" stroke="#00804a" stroke-width="1" stroke-dasharray="4,3" opacity="0.6"/>
+            <line x1="260" y1="380" x2="340" y2="430" stroke="#00804a" stroke-width="1" stroke-dasharray="4,3" opacity="0.6"/>
+            <line x1="155" y1="430" x2="340" y2="430" stroke="#00804a" stroke-width="1" stroke-dasharray="4,3" opacity="0.4"/>
+
+            <!-- PORT NODES -->
+            <!-- SGN (HCMC) -->
+            <circle cx="340" cy="430" r="16" fill="#051510" stroke="#00ff88" stroke-width="2.5" filter="url(#glow)" class="port-node" style="cursor:pointer" onclick="showPortInfo('SGN')"/>
+            <circle cx="340" cy="430" r="8" fill="#00ff88" opacity="0.9"/>
+            <circle cx="340" cy="430" r="20" fill="transparent" stroke="#00ff88" stroke-width="1" opacity="0.3">
+              <animate attributeName="r" from="16" to="28" dur="2s" repeatCount="indefinite"/>
+              <animate attributeName="opacity" from="0.4" to="0" dur="2s" repeatCount="indefinite"/>
+            </circle>
+            <text x="355" y="425" fill="#00ff88" font-size="11" font-weight="700" font-family="Syne">SGN</text>
+            <text x="355" y="438" fill="#7aaa90" font-size="9">Cat Lai Port</text>
+
+            <!-- HPH (Hai Phong) -->
+            <circle cx="255" cy="88" r="12" fill="#051510" stroke="#4facfe" stroke-width="2.5" filter="url(#glow)" style="cursor:pointer" onclick="showPortInfo('HPH')"/>
+            <circle cx="255" cy="88" r="6" fill="#4facfe" opacity="0.9"/>
+            <text x="270" y="84" fill="#4facfe" font-size="10" font-weight="700" font-family="Syne">HPH</text>
+            <text x="270" y="95" fill="#7aaa90" font-size="8">Hai Phong</text>
+
+            <!-- DAD (Da Nang) -->
+            <circle cx="310" cy="255" r="10" fill="#051510" stroke="#00d4aa" stroke-width="2" style="cursor:pointer" onclick="showPortInfo('DAD')"/>
+            <circle cx="310" cy="255" r="5" fill="#00d4aa" opacity="0.8"/>
+            <text x="322" y="251" fill="#00d4aa" font-size="9" font-weight="700" font-family="Syne">DAD</text>
+
+            <!-- WAREHOUSE NODES -->
+            <!-- Hanoi Cold Hub -->
+            <rect x="225" y="75" width="12" height="12" rx="3" fill="#f5a623" opacity="0.85" style="cursor:pointer" onclick="showWarehouseInfo('WH-001')"/>
+            <text x="240" y="86" fill="#7aaa90" font-size="8">Hanoi Hub</text>
+
+            <!-- Da Lat -->
+            <rect x="258" y="330" width="10" height="10" rx="2" fill="#00ff88" opacity="0.7" style="cursor:pointer"/>
+            <text x="270" y="339" fill="#7aaa90" font-size="8">Da Lat ☀️</text>
+
+            <!-- Can Tho -->
+            <rect x="228" y="450" width="10" height="10" rx="2" fill="#00ff88" opacity="0.7" style="cursor:pointer"/>
+            <text x="240" y="459" fill="#7aaa90" font-size="8">Can Tho</text>
+
+            <!-- Tien Giang -->
+            <rect x="265" y="440" width="10" height="10" rx="2" fill="#00ff88" opacity="0.65" style="cursor:pointer"/>
+
+            <!-- Kien Giang -->
+            <rect x="195" y="455" width="10" height="10" rx="2" fill="#f5a623" opacity="0.7" style="cursor:pointer"/>
+            <text x="163" y="464" fill="#7aaa90" font-size="8">Kien Giang</text>
+
+            <!-- Dak Lak -->
+            <rect x="250" y="315" width="10" height="10" rx="2" fill="#00ff88" opacity="0.7" style="cursor:pointer"/>
+            <text x="200" y="324" fill="#7aaa90" font-size="8">Dak Lak ☀️</text>
+
+            <!-- Ninh Thuan -->
+            <rect x="296" y="365" width="10" height="10" rx="2" fill="#00ff88" opacity="0.7" style="cursor:pointer"/>
+            <text x="308" y="374" fill="#7aaa90" font-size="8">Ninh Thuan ☀️</text>
+
+            <!-- Destination markers -->
+            <text x="460" y="530" fill="#4facfe" font-size="9" font-style="italic" opacity="0.6">Singapore</text>
+            <text x="455" y="95" fill="#4facfe" font-size="9" font-style="italic" opacity="0.5">Shanghai</text>
+            <text x="460" y="25" fill="#4facfe" font-size="9" font-style="italic" opacity="0.4">Osaka</text>
+            <text x="455" y="205" fill="#f5a623" font-size="8" font-style="italic" opacity="0.4">Rotterdam →</text>
+
+            <!-- Live truck indicators -->
+            <circle cx="290" cy="435" r="4" fill="#f5a623" opacity="0.9">
+              <animate attributeName="cx" values="290;310;330;330" dur="4s" repeatCount="indefinite"/>
+              <animate attributeName="cy" values="435;433;432;430" dur="4s" repeatCount="indefinite"/>
+            </circle>
+            <circle cx="245" cy="448" r="3" fill="#f5a623" opacity="0.7">
+              <animate attributeName="cx" values="245;270;310;340" dur="6s" repeatCount="indefinite"/>
+              <animate attributeName="cy" values="448;442;438;430" dur="6s" repeatCount="indefinite"/>
+            </circle>
+
+            <!-- Scale bar -->
+            <line x1="30" y1="570" x2="100" y2="570" stroke="#4a7060" stroke-width="1.5"/>
+            <text x="30" y="582" fill="#4a7060" font-size="8">0</text>
+            <text x="85" y="582" fill="#4a7060" font-size="8">200km</text>
+          </svg>
+
+          <!-- Map Legend -->
+          <div class="map-legend">
+            <div class="legend-item"><div class="legend-dot" style="background:#00ff88"></div>Active Port</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#f5a623;border-radius:3px"></div>Cold Warehouse</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#f5a623"></div>Reefer Truck</div>
+            <div class="legend-item" style="align-items:flex-start"><div style="width:20px;height:2px;border-top:2px dashed #00ff88;margin-top:5px;"></div><span style="margin-left:4px">Sea Route</span></div>
+            <div class="legend-item" style="align-items:flex-start"><div style="width:20px;height:2px;border-top:2px dashed #00804a;margin-top:5px;"></div><span style="margin-left:4px">Road Route</span></div>
+            <div class="legend-item"><span style="font-size:0.7rem;color:#00ff88">☀️</span> Solar Powered</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Stats Row -->
+    <div class="grid-3" style="margin-bottom:1.5rem">
+      <div class="card">
+        <div class="card-header"><div class="card-title">🚨 Active Alerts</div><span class="badge-red" style="font-size:0.72rem;padding:3px 8px;border-radius:6px;background:rgba(255,71,87,0.15);color:#ff4757;font-weight:700;">2 Critical</span></div>
+        <div id="alert-preview"></div>
+        <button class="btn btn-outline btn-sm" style="width:100%;margin-top:8px;" onclick="showPage('alerts')">View All Alerts</button>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-title">🔗 Pending Matches</div></div>
+        <div id="match-preview"></div>
+        <button class="btn btn-outline btn-sm" style="width:100%;margin-top:8px;" onclick="showPage('orders')">Manage Orders</button>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-title">🌿 Today's CO₂ Saved</div></div>
+        <div style="text-align:center;padding:1rem 0">
+          <div style="font-family:var(--font-display);font-size:3rem;font-weight:800;color:var(--green-neon);">4.2T</div>
+          <div style="font-size:0.8rem;color:var(--text-dim);margin-top:4px;">CO₂ equivalent avoided</div>
+          <div style="font-size:0.75rem;color:var(--teal);margin-top:8px;">🌳 = 186 trees planted today</div>
+        </div>
+        <button class="btn btn-outline btn-sm" style="width:100%;margin-top:8px;" onclick="showPage('green')">View Impact Report</button>
+      </div>
+    </div>
+
+    <!-- Vessel + Backhaul row -->
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-header"><div class="card-title">🚢 Upcoming Departures</div><button class="btn btn-outline btn-sm" onclick="showPage('vessels')">Full Schedule</button></div>
+        <div id="vessel-preview"></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-title">🔄 Backhaul Opportunities</div><span class="badge-green" style="font-size:0.72rem;padding:3px 8px;border-radius:6px;">5 Available</span></div>
+        <div id="backhaul-preview"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ─────── ROUTE OPTIMIZER PAGE ─────── -->
+<div id="page-optimizer" class="page">
+  <div class="hero" style="padding:2rem 2.5rem">
+    <div class="hero-tag">🗺️ AI Route Intelligence</div>
+    <h1>Find the <span class="accent">Greenest</span> Route</h1>
+    <p>AI compares all road + sea combinations, calculates exact CO₂ impact, and recommends the optimal route for your cargo — balancing cost, speed, and sustainability.</p>
+  </div>
+  <div class="content-area">
+    <div class="optimizer-form">
+      <div class="section-title"><div class="dot"></div>Shipment Details</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">📍 Origin Warehouse</label>
+          <select class="form-control" id="opt-origin">
+            <option value="WH-009">Kien Giang Shrimp Hub</option>
+            <option value="WH-003">Can Tho Mekong Hub</option>
+            <option value="WH-002">Da Lat Highland Storage</option>
+            <option value="WH-008">Dak Lak Coffee Cold</option>
+            <option value="WH-005">Tien Giang Farm Buffer</option>
+            <option value="WH-001">Hanoi Cold Hub</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">🌐 Destination Market</label>
+          <select class="form-control" id="opt-dest">
+            <option value="OSAKA">Osaka, Japan 🇯🇵</option>
+            <option value="SHANGHAI">Shanghai, China 🇨🇳</option>
+            <option value="BUSAN">Busan, South Korea 🇰🇷</option>
+            <option value="ROTTERDAM">Rotterdam, EU 🇳🇱</option>
+            <option value="SINGAPORE">Singapore 🇸🇬</option>
+            <option value="LAEM_CHABANG">Laem Chabang, Thailand 🇹🇭</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">📦 Product</label>
+          <select class="form-control" id="opt-product">
+            <option value="SF001">🦐 Frozen Shrimp (Seafood)</option>
+            <option value="SF002">🐟 Pangasius Fillet</option>
+            <option value="AG003">🥭 Fresh Mango</option>
+            <option value="AG001">🐉 Dragon Fruit</option>
+            <option value="AG002">🌵 Durian</option>
+            <option value="DG002">☕ Roasted Coffee</option>
+            <option value="DG001">🌾 ST25 Rice</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">⚖️ Quantity (Tons)</label>
+          <input type="number" class="form-control" id="opt-qty" value="24" min="1" max="500">
+        </div>
+        <div class="form-group">
+          <label class="form-label">📅 Delivery Deadline</label>
+          <input type="date" class="form-control" id="opt-deadline">
+        </div>
+        <div class="form-group">
+          <label class="form-label">🌿 Priority</label>
+          <select class="form-control" id="opt-priority">
+            <option value="green">🌿 Green First (Minimize CO₂)</option>
+            <option value="cost">💰 Cost First</option>
+            <option value="speed">⚡ Speed First</option>
+            <option value="balanced">⚖️ Balanced</option>
+          </select>
+        </div>
+      </div>
+      <button class="btn btn-primary" onclick="runOptimizer()" style="width:100%;justify-content:center;padding:14px;">
+        🧠 Find Optimal Routes with AI
+      </button>
+    </div>
+
+    <div id="optimizer-results" class="route-results" style="display:none;"></div>
+  </div>
+</div>
+
+<!-- ─────── ORDER MATCHING PAGE ─────── -->
+<div id="page-orders" class="page">
+  <div class="hero" style="padding:2rem 2.5rem">
+    <div class="hero-tag">🔗 AI Order Intelligence</div>
+    <h1>Smart <span class="accent">Order Matching</span></h1>
+    <p>AI automatically checks product compatibility (temperature, odor, ethylene), groups compatible cargo, and maximizes container fill rate — cutting your transport cost per ton.</p>
+  </div>
+  <div class="content-area">
+    <div class="tab-row">
+      <button class="tab-btn active" onclick="switchTab('orders-tab','pending')">📥 Pending Orders</button>
+      <button class="tab-btn" onclick="switchTab('orders-tab','matched')">🔗 AI Matched Groups</button>
+      <button class="tab-btn" onclick="switchTab('orders-tab','rules')">📋 Compatibility Rules</button>
+    </div>
+
+    <div id="orders-tab-pending">
+      <div class="card" style="margin-bottom:1.5rem">
+        <div class="card-header">
+          <div class="card-title">Active Shipment Orders</div>
+          <button class="btn btn-primary btn-sm" onclick="runMatching()">🧠 Run AI Match</button>
+        </div>
+        <table class="order-table">
+          <thead>
+            <tr>
+              <th>Order ID</th><th>Shipper</th><th>Product</th><th>Qty</th>
+              <th>Origin</th><th>Market</th><th>Deadline</th><th>Status</th><th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="orders-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="orders-tab-matched" style="display:none">
+      <div class="section-title"><div class="dot"></div>AI-Generated Match Groups</div>
+      <div id="match-groups-container"></div>
+    </div>
+
+    <div id="orders-tab-rules" style="display:none">
+      <div class="card">
+        <div class="card-title" style="margin-bottom:1.25rem">📋 Cargo Compatibility Matrix</div>
+        <div id="compat-matrix"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ─────── WAREHOUSES PAGE ─────── -->
+<div id="page-warehouses" class="page">
+  <div class="hero" style="padding:2rem 2.5rem">
+    <div class="hero-tag">🏭 Cold Network</div>
+    <h1>Vietnam <span class="accent">Cold Storage</span> Network</h1>
+    <p>89 connected cold warehouses from farm buffers in Mekong Delta to port hubs in HCMC and Hai Phong. Solar-powered facilities marked with ☀️.</p>
+  </div>
+  <div class="content-area">
+    <div style="display:flex;gap:12px;margin-bottom:1.5rem;flex-wrap:wrap;">
+      <button class="btn btn-outline btn-sm active-filter" onclick="filterWH('all')">All (12)</button>
+      <button class="btn btn-outline btn-sm" onclick="filterWH('FARM_BUFFER')">🌾 Farm Buffers</button>
+      <button class="btn btn-outline btn-sm" onclick="filterWH('REGIONAL_HUB')">🏭 Regional Hubs</button>
+      <button class="btn btn-outline btn-sm" onclick="filterWH('PORT_HUB')">⚓ Port Hubs</button>
+      <button class="btn btn-outline btn-sm" onclick="filterWH('solar')">☀️ Solar Only</button>
+    </div>
+    <div class="grid-3" id="warehouse-grid"></div>
+  </div>
+</div>
+
+<!-- ─────── VESSEL SCHEDULE PAGE ─────── -->
+<div id="page-vessels" class="page">
+  <div class="hero" style="padding:2rem 2.5rem">
+    <div class="hero-tag">🚢 Live Vessel Intelligence</div>
+    <h1>Vessel <span class="accent">Schedule</span> & Slot Availability</h1>
+    <p>Real-time vessel tracking with reefer slot availability. AI automatically adjusts warehouse cold storage plans when vessels are delayed.</p>
+  </div>
+  <div class="content-area">
+    <div style="display:flex;gap:12px;margin-bottom:1.5rem;">
+      <select class="form-control" style="max-width:200px;" id="vessel-port-filter" onchange="filterVessels()">
+        <option value="all">All Ports</option>
+        <option value="SGN">SGN - Cat Lai</option>
+        <option value="HPH">HPH - Hai Phong</option>
+        <option value="DAD">DAD - Da Nang</option>
+      </select>
+      <select class="form-control" style="max-width:200px;" id="vessel-dest-filter" onchange="filterVessels()">
+        <option value="all">All Destinations</option>
+        <option value="OSAKA">Osaka</option>
+        <option value="SHANGHAI">Shanghai</option>
+        <option value="ROTTERDAM">Rotterdam</option>
+        <option value="SINGAPORE">Singapore</option>
+      </select>
+    </div>
+    <div id="vessel-list"></div>
+  </div>
+</div>
+
+<!-- ─────── GREEN IMPACT PAGE ─────── -->
+<div id="page-green" class="page">
+  <div class="hero" style="padding:2rem 2.5rem; background: linear-gradient(135deg, #020f06 0%, #041808 50%, #021206 100%);">
+    <div class="hero-tag" style="border-color:rgba(0,255,136,0.4);">🌿 Sustainability Report</div>
+    <h1>Our <span class="accent">Green</span> Promise</h1>
+    <p>Every route we optimize reduces empty truck runs, eliminates unnecessary port congestion, and connects solar-powered farm buffers — delivering measurable climate impact.</p>
+  </div>
+  <div class="content-area">
+    <div class="grid-4" style="margin-bottom:2rem">
+      <div class="impact-card">
+        <div class="impact-icon">🌿</div>
+        <div class="impact-number">1,284</div>
+        <div class="impact-unit">Tons CO₂ Avoided This Month</div>
+        <div class="impact-desc">vs. conventional logistics network</div>
+      </div>
+      <div class="impact-card">
+        <div class="impact-icon">🌳</div>
+        <div class="impact-number">57K</div>
+        <div class="impact-unit">Tree-Equivalent Impact</div>
+        <div class="impact-desc">Annual reforestation equivalent</div>
+      </div>
+      <div class="impact-card">
+        <div class="impact-icon">🚛</div>
+        <div class="impact-number">3,421</div>
+        <div class="impact-unit">Empty Truck Runs Eliminated</div>
+        <div class="impact-desc">via backhaul matching AI</div>
+      </div>
+      <div class="impact-card">
+        <div class="impact-icon">☀️</div>
+        <div class="impact-number">67%</div>
+        <div class="impact-unit">Warehouses Solar Powered</div>
+        <div class="impact-desc">Target: 90% by 2027</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title" style="margin-bottom:1.5rem">🌿 CO₂ by Transport Mode</div>
+        <div id="co2-breakdown"></div>
+      </div>
+      <div class="card">
+        <div class="card-title" style="margin-bottom:1.5rem">📅 Monthly CO₂ Reduction Trend</div>
+        <div id="co2-trend"></div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:1.5rem">
+      <div class="card-title" style="margin-bottom:1.25rem">⚖️ CO₂ Emission Factors — Vietnam Cold Chain</div>
+      <table class="order-table">
+        <thead><tr><th>Vehicle Type</th><th>Emission Factor</th><th>Unit</th><th>Source</th><th>vs. Baseline</th></tr></thead>
+        <tbody>
+          <tr><td>🚛 Diesel Truck 10T</td><td style="color:var(--amber)">0.062</td><td>kg/ton·km</td><td>GLEC Framework</td><td><span class="badge-amber">Baseline</span></td></tr>
+          <tr><td>🚛 Diesel Truck 20T</td><td style="color:var(--amber)">0.047</td><td>kg/ton·km</td><td>GLEC Framework</td><td><span class="badge-green">-24%</span></td></tr>
+          <tr><td>⚡ Electric Truck</td><td style="color:var(--green-neon)">0.015</td><td>kg/ton·km</td><td>Estimated</td><td><span class="badge-green">-76%</span></td></tr>
+          <tr><td>🚢 Feeder Vessel</td><td style="color:var(--green-neon)">0.025</td><td>kg/TEU·nm</td><td>IMO 2023</td><td><span class="badge-green">Sea vs Road</span></td></tr>
+          <tr><td>🚢 LNG Vessel</td><td style="color:var(--green-neon)">0.018</td><td>kg/TEU·nm</td><td>IMO 2023</td><td><span class="badge-green">-28% vs Diesel</span></td></tr>
+          <tr><td>☀️ Solar Warehouse</td><td style="color:var(--green-neon)">0.008</td><td>kg/pallet·day</td><td>Estimated</td><td><span class="badge-green">-73% vs Grid</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ─────── ALERTS PAGE ─────── -->
+<div id="page-alerts" class="page">
+  <div class="content-area">
+    <div class="section-title"><div class="dot"></div>Live System Alerts & Congestion Intelligence</div>
+    <div id="alerts-container"></div>
+  </div>
+</div>
+
+<!-- ─────── BACKHAUL PAGE ─────── -->
+<div id="page-backhaul" class="page">
+  <div class="hero" style="padding:2rem 2.5rem">
+    <div class="hero-tag">🔄 Backhaul Intelligence</div>
+    <h1>Turn Empty Trucks into <span class="accent">Revenue</span></h1>
+    <p>AI matches trucks completing import deliveries with nearby export cargo — eliminating empty return trips and slashing freight costs by up to 40%.</p>
+  </div>
+  <div class="content-area">
+    <div class="grid-2">
+      <div>
+        <div class="section-title"><div class="dot"></div>Available Backhaul Matches</div>
+        <div id="backhaul-list"></div>
+      </div>
+      <div class="card">
+        <div class="card-title" style="margin-bottom:1.25rem">💡 How Backhaul Matching Works</div>
+        <div style="display:flex;flex-direction:column;gap:1rem;">
+          <div style="display:flex;gap:12px;align-items:flex-start;">
+            <div style="width:32px;height:32px;background:var(--green-dim);border:1px solid rgba(0,255,136,0.3);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:1rem;">1</div>
+            <div><div style="font-weight:600;font-size:0.875rem;margin-bottom:3px;">Import truck delivers goods from port</div><div style="font-size:0.8rem;color:var(--text-dim);">e.g. Imported fruits from Thailand arrive at Can Tho</div></div>
+          </div>
+          <div style="display:flex;gap:12px;align-items:flex-start;">
+            <div style="width:32px;height:32px;background:var(--green-dim);border:1px solid rgba(0,255,136,0.3);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:1rem;">2</div>
+            <div><div style="font-weight:600;font-size:0.875rem;margin-bottom:3px;">AI scans 30km radius instantly</div><div style="font-size:0.8rem;color:var(--text-dim);">Finds cold warehouses with export cargo ready to ship</div></div>
+          </div>
+          <div style="display:flex;gap:12px;align-items:flex-start;">
+            <div style="width:32px;height:32px;background:var(--green-dim);border:1px solid rgba(0,255,136,0.3);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:1rem;">3</div>
+            <div><div style="font-weight:600;font-size:0.875rem;margin-bottom:3px;">Match confirmed in real-time</div><div style="font-size:0.8rem;color:var(--text-dim);">Truck loads export shrimp → heads back to SGN port</div></div>
+          </div>
+          <div style="display:flex;gap:12px;align-items:flex-start;">
+            <div style="width:32px;height:32px;background:var(--green-dim);border:1px solid rgba(0,255,136,0.3);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:1rem;">4</div>
+            <div><div style="font-weight:600;font-size:0.875rem;margin-bottom:3px;">Everyone wins</div><div style="font-size:0.8rem;color:var(--text-dim);">Truck earns extra +45% revenue. Farmer saves 35-40% on freight. 0 empty km run.</div></div>
+          </div>
+        </div>
+        <div style="margin-top:1.5rem;padding:1rem;background:var(--bg2);border-radius:10px;border:1px solid rgba(0,255,136,0.15);">
+          <div style="font-size:0.75rem;color:var(--text-muted);margin-bottom:8px;">TODAY'S NETWORK IMPACT</div>
+          <div style="display:flex;justify-content:space-between;">
+            <div><div style="font-family:var(--font-display);font-weight:800;color:var(--green-neon);font-size:1.4rem;">847km</div><div style="font-size:0.72rem;color:var(--text-dim)">Empty km avoided</div></div>
+            <div><div style="font-family:var(--font-display);font-weight:800;color:var(--teal);font-size:1.4rem;">2.1T</div><div style="font-size:0.72rem;color:var(--text-dim)">CO₂ saved</div></div>
+            <div><div style="font-family:var(--font-display);font-weight:800;color:var(--amber);font-size:1.4rem;">₫84M</div><div style="font-size:0.72rem;color:var(--text-dim)">Extra truck revenue</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ─────── AI ASSISTANT PAGE ─────── -->
+<div id="page-assistant" class="page">
+  <div class="content-area">
+    <div class="section-title"><div class="dot"></div>🤖 ColdRoute AI Assistant</div>
+    <div class="grid-2">
+      <div class="ai-panel">
+        <div class="ai-header">
+          <div class="ai-avatar">🧊</div>
+          <div>
+            <div class="ai-name">ColdRoute AI</div>
+            <div class="ai-sub">Cold Chain Intelligence • Powered by Anthropic</div>
+          </div>
+          <div style="margin-left:auto"><div class="green-badge">● Online</div></div>
+        </div>
+        <div class="ai-messages" id="ai-chat-messages">
+          <div class="msg ai">
+            <div class="msg-avatar">🧊</div>
+            <div class="msg-bubble">
+              Xin chào! I'm ColdRoute AI — your intelligent cold chain logistics assistant. I can help you:
+              <br><br>
+              🗺️ <strong>Find optimal routes</strong> with CO₂ calculation<br>
+              🔗 <strong>Match compatible cargo</strong> for shared containers<br>
+              ⚠️ <strong>Predict congestion</strong> and recommend buffer warehouses<br>
+              🔄 <strong>Find backhaul trucks</strong> to cut your freight cost<br><br>
+              What would you like to optimize today?
+            </div>
+          </div>
+        </div>
+        <div class="ai-suggestions">
+          <button class="ai-suggestion-btn" onclick="sendSuggestion('Best route for 20 tons shrimp from Kien Giang to Osaka?')">🦐 Shrimp → Osaka</button>
+          <button class="ai-suggestion-btn" onclick="sendSuggestion('Can I ship durian and shrimp together in one container?')">⚠️ Compatibility check</button>
+          <button class="ai-suggestion-btn" onclick="sendSuggestion('SGN port is congested. What should I do?')">🚨 Port congestion</button>
+          <button class="ai-suggestion-btn" onclick="sendSuggestion('Find backhaul trucks near Can Tho today')">🔄 Find backhaul</button>
+        </div>
+        <div class="ai-input-row">
+          <textarea class="ai-input" id="ai-input" placeholder="Ask about routes, cargo matching, congestion..." onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendAIMessage();}"></textarea>
+          <button class="ai-send" onclick="sendAIMessage()">➤</button>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:1rem;">
+        <div class="card">
+          <div class="card-title" style="margin-bottom:1rem">⚡ Quick Actions</div>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <button class="btn btn-outline" style="justify-content:flex-start;width:100%;" onclick="sendSuggestion('What warehouses have space available near Mekong Delta?')">🏭 Check warehouse availability</button>
+            <button class="btn btn-outline" style="justify-content:flex-start;width:100%;" onclick="sendSuggestion('Which vessels are delayed this week?')">🚢 Check vessel delays</button>
+            <button class="btn btn-outline" style="justify-content:flex-start;width:100%;" onclick="sendSuggestion('Calculate CO2 for 30 tons mango from Da Lat to Shanghai via road and sea')">🌿 Calculate CO₂ footprint</button>
+            <button class="btn btn-outline" style="justify-content:flex-start;width:100%;" onclick="sendSuggestion('What products are in peak season this month?')">🌾 Peak season products</button>
+            <button class="btn btn-outline" style="justify-content:flex-start;width:100%;" onclick="sendSuggestion('How to group 3 orders: 8T shrimp, 10T mango, 5T dragon fruit for one container?')">📦 Group 3 orders</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title" style="margin-bottom:1rem">📊 AI Capabilities</div>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <div style="display:flex;align-items:center;gap:8px;font-size:0.8rem;"><span style="color:var(--green-neon)">✓</span><span>Real-time route optimization (cost + CO₂)</span></div>
+            <div style="display:flex;align-items:center;gap:8px;font-size:0.8rem;"><span style="color:var(--green-neon)">✓</span><span>Cargo compatibility matrix (temp, odor, ethylene)</span></div>
+            <div style="display:flex;align-items:center;gap:8px;font-size:0.8rem;"><span style="color:var(--green-neon)">✓</span><span>Vessel delay prediction & buffer rerouting</span></div>
+            <div style="display:flex;align-items:center;gap:8px;font-size:0.8rem;"><span style="color:var(--green-neon)">✓</span><span>Backhaul truck matching (0 empty km)</span></div>
+            <div style="display:flex;align-items:center;gap:8px;font-size:0.8rem;"><span style="color:var(--green-neon)">✓</span><span>Seasonal demand forecasting</span></div>
+            <div style="display:flex;align-items:center;gap:8px;font-size:0.8rem;"><span style="color:var(--green-neon)">✓</span><span>Port congestion early warning</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</main>
+</div>
+
+<!-- ══════════════════════ SCRIPTS ══════════════════════ -->
+<script>
+// ════════════════════════════════════════════════════════
+// DATA (inline for demo)
+// ════════════════════════════════════════════════════════
+const WAREHOUSES = [
+  { id:"WH-001",name:"Hanoi Cold Hub",province:"Hanoi",lat:21.0085,lng:105.9382,tempRange:[-25,4],capacity:2000,available:1240,type:"REGIONAL_HUB",status:"ACTIVE",greenScore:87,solarPowered:true },
+  { id:"WH-002",name:"Da Lat Highland Storage",province:"Lam Dong",lat:11.7504,lng:108.3671,tempRange:[0,8],capacity:500,available:320,type:"FARM_BUFFER",status:"ACTIVE",greenScore:95,solarPowered:true },
+  { id:"WH-003",name:"Can Tho Mekong Hub",province:"Can Tho",lat:10.1116,lng:105.6985,tempRange:[-18,4],capacity:3000,available:1800,type:"REGIONAL_HUB",status:"ACTIVE",greenScore:72,solarPowered:false },
+  { id:"WH-004",name:"HCMC Port Cold Center",province:"Ho Chi Minh City",lat:10.7626,lng:106.7501,tempRange:[-25,8],capacity:8000,available:3200,type:"PORT_HUB",status:"ACTIVE",greenScore:65,solarPowered:false },
+  { id:"WH-005",name:"Tien Giang Farm Buffer",province:"Tien Giang",lat:10.35,lng:106.35,tempRange:[-5,12],capacity:800,available:650,type:"FARM_BUFFER",status:"ACTIVE",greenScore:91,solarPowered:true },
+  { id:"WH-006",name:"Ben Tre Coconut Cold",province:"Ben Tre",lat:10.234,lng:106.375,tempRange:[4,12],capacity:400,available:280,type:"FARM_BUFFER",status:"ACTIVE",greenScore:88,solarPowered:true },
+  { id:"WH-007",name:"Hai Phong North Hub",province:"Hai Phong",lat:20.8449,lng:106.6881,tempRange:[-25,4],capacity:4000,available:2100,type:"PORT_HUB",status:"ACTIVE",greenScore:70,solarPowered:false },
+  { id:"WH-008",name:"Dak Lak Coffee Cold",province:"Dak Lak",lat:12.6658,lng:108.0377,tempRange:[10,22],capacity:1200,available:900,type:"FARM_BUFFER",status:"ACTIVE",greenScore:93,solarPowered:true },
+  { id:"WH-009",name:"Kien Giang Shrimp Hub",province:"Kien Giang",lat:10.008,lng:105.081,tempRange:[-25,-18],capacity:2500,available:1100,type:"REGIONAL_HUB",status:"ACTIVE",greenScore:78,solarPowered:false },
+  { id:"WH-010",name:"Soc Trang Buffer",province:"Soc Trang",lat:9.6026,lng:105.9739,tempRange:[-20,-10],capacity:600,available:480,type:"FARM_BUFFER",status:"ACTIVE",greenScore:85,solarPowered:true },
+  { id:"WH-011",name:"Da Nang Central Hub",province:"Da Nang",lat:16.0544,lng:108.2022,tempRange:[-25,8],capacity:1500,available:800,type:"REGIONAL_HUB",status:"ACTIVE",greenScore:76,solarPowered:false },
+  { id:"WH-012",name:"Ninh Thuan Dragon Fruit",province:"Ninh Thuan",lat:11.5645,lng:108.9885,tempRange:[6,14],capacity:700,available:560,type:"FARM_BUFFER",status:"ACTIVE",greenScore:90,solarPowered:true },
+];
+
+const VESSELS = [
+  { id:"VS001",vessel:"SITC BEIJING",carrier:"SITC",from:"SGN",to:"OSAKA",etd:"2025-06-01",durationDays:7,slots:45,reeferSlots:18,pricePerTEU:280,status:"ON_TIME",greenRating:"B+",co2PerTEU:68 },
+  { id:"VS002",vessel:"EVER GIVEN II",carrier:"Evergreen",from:"SGN",to:"OSAKA",etd:"2025-06-03",durationDays:9,slots:12,reeferSlots:8,pricePerTEU:310,status:"ON_TIME",greenRating:"A-",co2PerTEU:65 },
+  { id:"VS003",vessel:"COSCO HARMONY",carrier:"COSCO",from:"SGN",to:"SHANGHAI",etd:"2025-06-02",durationDays:5,slots:82,reeferSlots:30,pricePerTEU:255,status:"DELAYED_2D",greenRating:"B",co2PerTEU:47 },
+  { id:"VS004",vessel:"HAPAG EXPRESS",carrier:"Hapag-Lloyd",from:"SGN",to:"ROTTERDAM",etd:"2025-06-05",durationDays:25,slots:34,reeferSlots:15,pricePerTEU:1850,status:"ON_TIME",greenRating:"A",co2PerTEU:290 },
+  { id:"VS005",vessel:"MSC LUNA",carrier:"MSC",from:"SGN",to:"ROTTERDAM",etd:"2025-06-10",durationDays:25,slots:65,reeferSlots:25,pricePerTEU:1780,status:"ON_TIME",greenRating:"B+",co2PerTEU:275 },
+  { id:"VS006",vessel:"SITC DALIAN",carrier:"SITC",from:"HPH",to:"SHANGHAI",etd:"2025-06-04",durationDays:3,slots:28,reeferSlots:12,pricePerTEU:240,status:"ON_TIME",greenRating:"B+",co2PerTEU:31 },
+  { id:"VS007",vessel:"PIL SINGAPORE",carrier:"PIL",from:"SGN",to:"SINGAPORE",etd:"2025-06-01",durationDays:2,slots:90,reeferSlots:40,pricePerTEU:120,status:"ON_TIME",greenRating:"A-",co2PerTEU:15 },
+  { id:"VS008",vessel:"HMM KOREA",carrier:"HMM",from:"SGN",to:"BUSAN",etd:"2025-06-07",durationDays:8,slots:22,reeferSlots:10,pricePerTEU:365,status:"ON_TIME",greenRating:"B",co2PerTEU:75 },
+  { id:"VS009",vessel:"RCL THAI",carrier:"RCL",from:"SGN",to:"LAEM_CHABANG",etd:"2025-06-02",durationDays:2,slots:55,reeferSlots:22,pricePerTEU:130,status:"ON_TIME",greenRating:"A",co2PerTEU:16 },
+  { id:"VS010",vessel:"COSCO TIANJIN",carrier:"COSCO",from:"SGN",to:"SHANGHAI",etd:"2025-06-08",durationDays:5,slots:70,reeferSlots:28,pricePerTEU:265,status:"ON_TIME",greenRating:"B+",co2PerTEU:47 },
+];
+
+const ORDERS = [
+  { id:"ORD-2025-001",shipper:"Minh Phu Seafood JSC",product:"🦐 Frozen Shrimp",productId:"SF001",qty:24,origin:"Kien Giang",destPort:"SGN",market:"OSAKA",deadline:"2025-06-05",status:"STORED",temp:[-25,-18] },
+  { id:"ORD-2025-002",shipper:"Hoang Anh Farm",product:"🥭 Fresh Mango",productId:"AG003",qty:18,origin:"Tien Giang",destPort:"SGN",market:"SHANGHAI",deadline:"2025-06-03",status:"IN_TRANSIT",temp:[10,13] },
+  { id:"ORD-2025-003",shipper:"Viet Coffee Export",product:"☕ Roasted Coffee",productId:"DG002",qty:40,origin:"Dak Lak",destPort:"SGN",market:"ROTTERDAM",deadline:"2025-06-10",status:"PENDING_VESSEL",temp:[15,22] },
+  { id:"ORD-2025-004",shipper:"Delta Fruit Co",product:"🐉 Dragon Fruit",productId:"AG001",qty:12,origin:"Ninh Thuan",destPort:"SGN",market:"SINGAPORE",deadline:"2025-06-04",status:"STORED",temp:[8,12] },
+  { id:"ORD-2025-005",shipper:"Mekong Shrimp Ltd",product:"🦐 Frozen Shrimp",productId:"SF001",qty:30,origin:"Can Tho",destPort:"SGN",market:"OSAKA",deadline:"2025-06-08",status:"MATCHING",temp:[-25,-18] },
+  { id:"ORD-2025-006",shipper:"Thanh Long Agri",product:"🐉 Dragon Fruit",productId:"AG001",qty:8,origin:"Ninh Thuan",destPort:"SGN",market:"SINGAPORE",deadline:"2025-06-04",status:"STORED",temp:[8,12] },
+  { id:"ORD-2025-007",shipper:"Mekong Rice Corp",product:"🌾 ST25 Rice",productId:"DG001",qty:50,origin:"Can Tho",destPort:"SGN",market:"ROTTERDAM",deadline:"2025-06-12",status:"STORED",temp:[15,25] },
+];
+
+const ALERTS = [
+  { type:"CONGESTION",severity:"CRITICAL",title:"🚨 Can Tho Hub approaching 85% capacity",desc:"Peak shrimp season + vessel delay on VS003. Recommend diverting 200T to Soc Trang Buffer (40km away).",action:"Redirect Cargo",icon:"🏭" },
+  { type:"VESSEL_DELAY",severity:"WARNING",title:"⚠️ COSCO HARMONY delayed 2 days (SGN → Shanghai)",desc:"ETD updated from Jun-02 to Jun-04. 12 affected reefer orders auto-moved to next allocation. Cargo stays in cold buffer — no extra port cost.",action:"View Rerouted Orders",icon:"🚢" },
+  { type:"SEASONAL",severity:"INFO",title:"📈 Peak shrimp season starting (Nov-Mar peak approach)",desc:"Pre-book Kien Giang Hub 7 days ahead. Historical data shows 95% capacity in weeks 2-3. 8 current open orders qualify.",action:"Pre-book Slots",icon:"🦐" },
+  { type:"BACKHAUL",severity:"INFO",title:"🔄 5 backhaul opportunities available right now",desc:"Import trucks from Thailand (PIL SINGAPORE ETA Jun-03) will be available for return haul. Estimated savings: ₫45M for farmers.",action:"View Matches",icon:"🚛" },
+];
+
+const BACKHAUL_MATCHES = [
+  { truck:"Truck #KG-2847",from:"Kien Giang → SGN Port",cargo:"Export Shrimp 20T",distKm:210,earningVND:"45.4M",co2Avoided:"882kg",eta:"Jun 03 06:00" },
+  { truck:"Truck #CT-1193",from:"Can Tho → SGN Port",cargo:"Export Mango 15T",distKm:165,earningVND:"30.2M",co2Avoided:"640kg",eta:"Jun 03 08:30" },
+  { truck:"Truck #TG-0482",from:"Tien Giang → SGN Port",cargo:"Export Dragon Fruit 12T",distKm:72,earningVND:"13.2M",co2Avoided:"240kg",eta:"Jun 02 22:00" },
+  { truck:"Truck #BT-3301",from:"Ben Tre → SGN Port",cargo:"Export Coffee 18T",distKm:84,earningVND:"18.1M",co2Avoided:"340kg",eta:"Jun 03 05:00" },
+  { truck:"Truck #ST-7712",from:"Soc Trang → Can Tho Hub",cargo:"Export Shrimp 10T",distKm:62,earningVND:"7.8M",co2Avoided:"188kg",eta:"Jun 02 20:00" },
+];
+
+// ════════════════════════════════════════════════════════
+// PAGE NAVIGATION
+// ════════════════════════════════════════════════════════
+function showPage(pageId) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active'));
+  document.querySelectorAll('.sidebar-item').forEach(s => s.classList.remove('active'));
+  
+  const page = document.getElementById('page-' + pageId);
+  if (page) page.classList.add('active');
+  
+  const navLink = document.getElementById('nav-' + pageId);
+  if (navLink) navLink.classList.add('active');
+  
+  // render content on demand
+  if (pageId === 'warehouses') renderWarehouses(WAREHOUSES);
+  if (pageId === 'vessels') renderVessels(VESSELS);
+  if (pageId === 'orders') { renderOrders(); renderMatchGroups(); renderCompatMatrix(); }
+  if (pageId === 'green') renderGreenPage();
+  if (pageId === 'alerts') renderAlerts();
+  if (pageId === 'backhaul') renderBackhaul();
+  if (pageId === 'dashboard') renderDashboardWidgets();
+
+  return false;
+}
+
+function switchTab(prefix, tab) {
+  ['pending','matched','rules'].forEach(t => {
+    const el = document.getElementById(prefix + '-' + t);
+    if (el) el.style.display = 'none';
+  });
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  const target = document.getElementById(prefix + '-' + tab);
+  if (target) target.style.display = 'block';
+  event.target.classList.add('active');
+}
+
+// ════════════════════════════════════════════════════════
+// DASHBOARD WIDGETS
+// ════════════════════════════════════════════════════════
+function renderDashboardWidgets() {
+  // Alert preview
+  const ap = document.getElementById('alert-preview');
+  if (ap) ap.innerHTML = ALERTS.slice(0,2).map(a => `
+    <div class="alert-card ${a.severity.toLowerCase()}" style="margin-bottom:8px;">
+      <div class="alert-icon">${a.icon}</div>
+      <div class="alert-content">
+        <div class="alert-title" style="font-size:0.8rem">${a.title}</div>
+        <div class="alert-desc" style="font-size:0.72rem">${a.desc.substring(0,80)}...</div>
+      </div>
+    </div>`).join('');
+
+  // Match preview
+  const mp = document.getElementById('match-preview');
+  if (mp) mp.innerHTML = `
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;background:var(--bg2);border-radius:8px;padding:10px 12px;font-size:0.8rem;">
+        <span>ORD-001 + ORD-005 (Shrimp × 2)</span>
+        <span class="badge-green" style="font-size:0.68rem;padding:2px 8px;border-radius:6px;">✓ Compatible</span>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;background:var(--bg2);border-radius:8px;padding:10px 12px;font-size:0.8rem;">
+        <span>ORD-004 + ORD-006 (Dragon Fruit × 2)</span>
+        <span class="badge-green" style="font-size:0.68rem;padding:2px 8px;border-radius:6px;">✓ Compatible</span>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;background:var(--bg2);border-radius:8px;padding:10px 12px;font-size:0.8rem;">
+        <span>ORD-002 + ORD-003 (Mango + Coffee)</span>
+        <span class="badge-amber" style="font-size:0.68rem;padding:2px 8px;border-radius:6px;">⚠️ Check odor</span>
+      </div>
+    </div>`;
+
+  // Vessel preview
+  const vp = document.getElementById('vessel-preview');
+  if (vp) vp.innerHTML = VESSELS.slice(0,4).map(v => `
+    <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);">
+      <div style="flex:1"><div style="font-weight:700;font-size:0.8rem">${v.vessel}</div><div style="font-size:0.72rem;color:var(--text-muted)">${v.carrier} • ${v.from}→${v.to}</div></div>
+      <div style="text-align:right"><div style="font-size:0.8rem;font-weight:600">${v.etd}</div><div style="font-size:0.68rem;color:var(--text-muted)">${v.reeferSlots} reefer slots</div></div>
+      <span class="vessel-status ${v.status==='ON_TIME'?'vs-ontime':'vs-delayed'}">${v.status==='ON_TIME'?'On Time':'Delayed'}</span>
+    </div>`).join('');
+
+  // Backhaul preview
+  const bhp = document.getElementById('backhaul-preview');
+  if (bhp) bhp.innerHTML = BACKHAUL_MATCHES.slice(0,3).map(b => `
+    <div class="backhaul-card">
+      <div class="truck-icon">🚛</div>
+      <div class="bh-info"><div class="bh-route" style="font-size:0.82rem">${b.from}</div><div class="bh-sub">${b.cargo} • ${b.distKm}km</div></div>
+      <div class="bh-earning"><div class="bh-amount" style="font-size:0.95rem">+${b.earningVND}</div><div class="bh-co2">↓ ${b.co2Avoided} CO₂</div></div>
+    </div>`).join('');
+}
+
+// ════════════════════════════════════════════════════════
+// ROUTE OPTIMIZER
+// ════════════════════════════════════════════════════════
+function runOptimizer() {
+  const origin = document.getElementById('opt-origin').value;
+  const dest = document.getElementById('opt-dest').value;
+  const product = document.getElementById('opt-product').value;
+  const qty = parseInt(document.getElementById('opt-qty').value) || 24;
+  const priority = document.getElementById('opt-priority').value;
+
+  const resultsDiv = document.getElementById('optimizer-results');
+  resultsDiv.style.display = 'block';
+  resultsDiv.innerHTML = `<div class="loading"><div class="spinner"></div>🧠 AI analyzing ${qty}T shipment across all route combinations...</div>`;
+
+  setTimeout(() => {
+    const routes = generateRoutes(origin, dest, product, qty, priority);
+    resultsDiv.innerHTML = `
+      <div class="section-title"><div class="dot"></div>Optimal Routes Found — ${routes.length} Options</div>
+      ${routes.map((r, i) => renderRouteCard(r, i)).join('')}
+    `;
+  }, 1800);
+}
+
+function generateRoutes(origin, dest, product, qty, priority) {
+  const whMap = { "WH-009":"Kien Giang","WH-003":"Can Tho","WH-002":"Da Lat","WH-008":"Dak Lak","WH-005":"Tien Giang","WH-001":"Hanoi" };
+  const destMap = { "OSAKA":"Osaka, Japan","SHANGHAI":"Shanghai, China","BUSAN":"Busan, Korea","ROTTERDAM":"Rotterdam, EU","SINGAPORE":"Singapore","LAEM_CHABANG":"Laem Chabang, Thailand" };
+  const prodMap = { "SF001":"🦐 Frozen Shrimp","SF002":"🐟 Pangasius","AG003":"🥭 Mango","AG001":"🐉 Dragon Fruit","AG002":"🌵 Durian","DG002":"☕ Coffee","DG001":"🌾 Rice" };
+  
+  const relevantVessels = VESSELS.filter(v => v.to === dest && v.from === "SGN");
+  const routes = [];
+
+  relevantVessels.slice(0,3).forEach((v, i) => {
+    const distKm = { "WH-009":350,"WH-003":180,"WH-002":295,"WH-008":550,"WH-005":75,"WH-001":1726 }[origin] || 200;
+    const roadCO2 = Math.round(distKm * qty * 0.047);
+    const seaCO2 = Math.round(v.co2PerTEU * Math.ceil(qty/22));
+    const totalCO2 = roadCO2 + seaCO2;
+    const saved = Math.round(totalCO2 * 0.3);
+    const gs = Math.max(55, Math.min(98, 90 - i*8 + (priority==='green'?8:0)));
+    const totalCost = v.pricePerTEU * Math.ceil(qty/22) + distKm * qty * 1800 / 1000000 * 25000;
+    const backhaulAvailable = Math.random() > 0.3;
+    
+    routes.push({
+      id: `RT-${v.id}`,
+      recommended: i === 0,
+      isBestGreen: i === 0 && priority === 'green',
+      isBestCost: i === 1,
+      legs: [
+        { from: whMap[origin] || "Origin", to: "Tan Cang Cat Lai (SGN)", mode: "ROAD", distKm, duration: `${Math.ceil(distKm/60)}–${Math.ceil(distKm/50)+1}h`, co2Kg: roadCO2, vehicle: "Reefer 20T Truck", backhaulAvailable },
+        { from: "SGN Port", to: destMap[dest]||dest, mode: "SEA", durationD: v.durationDays, co2Kg: seaCO2, vessel: v.vessel, carrier: v.carrier, etd: v.etd, greenRating: v.greenRating, pricePerTEU: v.pricePerTEU }
+      ],
+      greenScore: gs,
+      rating: gs >= 90?"A+":gs >= 80?"A":gs >= 70?"B+":"B",
+      totalCO2Kg: totalCO2,
+      co2SavedKg: saved,
+      co2SavedPct: Math.round(saved/totalCO2*100),
+      totalCostUSD: Math.round(totalCost),
+      totalDays: 1 + v.durationDays,
+      vessel: v,
+    });
+  });
+
+  // Sort by priority
+  if (priority === 'green') routes.sort((a,b) => b.greenScore - a.greenScore);
+  else if (priority === 'cost') routes.sort((a,b) => a.totalCostUSD - b.totalCostUSD);
+  else if (priority === 'speed') routes.sort((a,b) => a.totalDays - b.totalDays);
+  
+  return routes;
+}
+
+function renderRouteCard(r, idx) {
+  const gs = r.greenScore;
+  const circumference = 2 * Math.PI * 27;
+  const dash = (gs / 100) * circumference;
+  const color = gs >= 85 ? '#00ff88' : gs >= 70 ? '#f5a623' : '#ff4757';
+  
+  return `
+    <div class="route-card ${r.recommended?'recommended':''}">
+      ${r.recommended ? '<div style="position:absolute;top:12px;right:12px;font-size:0.7rem;font-weight:700;background:linear-gradient(90deg,#00ff88,#00d4aa);color:#000;padding:3px 10px;border-radius:6px;">⭐ RECOMMENDED</div>' : ''}
+      <div class="route-header">
+        <div>
+          <div class="route-name">${r.legs[1].carrier} — ${r.legs[1].vessel}</div>
+          <div class="route-badges" style="margin-top:6px">
+            ${r.isBestGreen ? '<span class="route-badge badge-green">🌿 Best Green</span>' : ''}
+            ${r.isBestCost ? '<span class="route-badge badge-blue">💰 Best Price</span>' : ''}
+            ${r.vessel.status !== 'ON_TIME' ? '<span class="route-badge badge-amber">⚠️ Delayed</span>' : '<span class="route-badge badge-green">✓ On Time</span>'}
+            ${r.legs[0].backhaulAvailable ? '<span class="route-badge badge-green">🔄 Backhaul Match</span>' : ''}
+          </div>
+        </div>
+        <div class="green-score-ring">
+          <svg viewBox="0 0 60 60">
+            <circle class="ring-bg" cx="30" cy="30" r="27"/>
+            <circle class="ring-fill" cx="30" cy="30" r="27" stroke="${color}"
+              stroke-dasharray="${dash} ${circumference}" stroke-dashoffset="0"/>
+          </svg>
+          <div class="ring-text" style="color:${color}">${gs}</div>
+        </div>
+      </div>
+
+      <div class="route-legs">
+        <div class="leg">
+          <div class="leg-icon">🚛</div>
+          <div class="leg-info">
+            <div class="leg-mode">${r.legs[0].from} → SGN</div>
+            <div class="leg-detail">${r.legs[0].distKm}km · ${r.legs[0].duration} · Reefer 20T</div>
+          </div>
+        </div>
+        <div class="leg-arrow">→</div>
+        <div class="leg" style="background:rgba(79,172,254,0.05);border:1px solid rgba(79,172,254,0.15)">
+          <div class="leg-icon">🚢</div>
+          <div class="leg-info">
+            <div class="leg-mode">SGN → ${r.legs[1].to}</div>
+            <div class="leg-detail">ETD ${r.legs[1].etd} · ${r.legs[1].durationD}d · ${r.legs[1].carrier}</div>
+          </div>
+        </div>
+        <div class="leg-arrow">→</div>
+        <div class="leg" style="background:rgba(0,255,136,0.05);border:1px solid rgba(0,255,136,0.15)">
+          <div class="leg-icon">📦</div>
+          <div class="leg-info">
+            <div class="leg-mode">Delivered</div>
+            <div class="leg-detail">+${r.totalDays} days total</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="route-metrics">
+        <div class="metric">
+          <div class="metric-val green">${r.greenScore} / 100</div>
+          <div class="metric-label">🌿 Green Score</div>
+        </div>
+        <div class="metric">
+          <div class="metric-val">${r.totalCO2Kg.toLocaleString()} kg</div>
+          <div class="metric-label">Total CO₂</div>
+        </div>
+        <div class="metric">
+          <div class="metric-val green">↓ ${r.co2SavedPct}%</div>
+          <div class="metric-label">CO₂ Saved vs Standard</div>
+        </div>
+        <div class="metric">
+          <div class="metric-val">$${r.totalCostUSD.toLocaleString()}</div>
+          <div class="metric-label">Estimated Cost</div>
+        </div>
+      </div>
+      <div style="margin-top:1rem;display:flex;gap:8px;">
+        <button class="btn btn-primary btn-sm" onclick="bookRoute('${r.id}')">📋 Book This Route</button>
+        <button class="btn btn-outline btn-sm">📊 Detailed CO₂ Report</button>
+        ${r.legs[0].backhaulAvailable ? '<button class="btn btn-outline btn-sm" style="border-color:rgba(0,255,136,0.3);color:var(--green-neon);">🔄 Activate Backhaul</button>' : ''}
+      </div>
+    </div>`;
+}
+
+function bookRoute(id) {
+  const btn = event.target;
+  btn.textContent = '✓ Route Booked!';
+  btn.style.background = 'var(--green-dark)';
+  setTimeout(() => { btn.textContent = '📋 Book This Route'; btn.style.background = ''; }, 3000);
+}
+
+// ════════════════════════════════════════════════════════
+// WAREHOUSES
+// ════════════════════════════════════════════════════════
+function renderWarehouses(list) {
+  const grid = document.getElementById('warehouse-grid');
+  if (!grid) return;
+  grid.innerHTML = list.map(wh => {
+    const fill = Math.round(((wh.capacity - wh.available) / wh.capacity) * 100);
+    const typeClass = wh.type === 'FARM_BUFFER' ? 'type-farm' : wh.type === 'PORT_HUB' ? 'type-port' : 'type-hub';
+    const typeLabel = wh.type === 'FARM_BUFFER' ? '🌾 Farm Buffer' : wh.type === 'PORT_HUB' ? '⚓ Port Hub' : '🏭 Regional Hub';
+    const gsClass = wh.greenScore >= 85 ? 'gs-high' : wh.greenScore >= 70 ? 'gs-mid' : 'gs-low';
+    const barClass = fill > 85 ? 'critical' : fill > 70 ? 'warn' : '';
+    return `
+      <div class="warehouse-card">
+        <div class="wh-header">
+          <div>
+            <div class="wh-name">${wh.name}${wh.solarPowered?' ☀️':''}</div>
+            <div class="wh-location">📍 ${wh.province}</div>
+          </div>
+          <span class="wh-type ${typeClass}">${typeLabel}</span>
+        </div>
+        <div class="wh-fill">
+          <div class="wh-fill-label"><span>Capacity Used</span><span style="font-weight:700;${fill>85?'color:var(--red)':fill>70?'color:var(--amber)':'color:var(--green-neon)'}">${fill}%</span></div>
+          <div class="capacity-bar"><div class="capacity-bar-inner ${barClass}" style="width:${fill}%"></div></div>
+          <div style="font-size:0.72rem;color:var(--text-muted);margin-top:4px">${wh.available.toLocaleString()} / ${wh.capacity.toLocaleString()} tons available</div>
+        </div>
+        <div class="wh-meta">
+          <div class="wh-meta-item">🌡️ ${wh.tempRange[0]}°C to ${wh.tempRange[1]}°C</div>
+          <div class="wh-meta-item"><span class="green-score-pill ${gsClass}">🌿 ${wh.greenScore}</span></div>
+          ${wh.solarPowered ? '<div class="wh-meta-item"><span style="color:var(--amber)">☀️ Solar</span></div>' : ''}
+        </div>
+        <button class="btn btn-outline btn-sm" style="width:100%;margin-top:12px;" onclick="bookWarehouse('${wh.id}')">📦 Book Space</button>
+      </div>`;
+  }).join('');
+}
+
+function filterWH(type) {
+  const filtered = type === 'all' ? WAREHOUSES
+    : type === 'solar' ? WAREHOUSES.filter(w => w.solarPowered)
+    : WAREHOUSES.filter(w => w.type === type);
+  renderWarehouses(filtered);
+}
+
+function bookWarehouse(id) { event.target.textContent = '✓ Slot Reserved'; setTimeout(() => { event.target.textContent = '📦 Book Space'; }, 2000); }
+
+// ════════════════════════════════════════════════════════
+// VESSEL SCHEDULE
+// ════════════════════════════════════════════════════════
+function renderVessels(list) {
+  const el = document.getElementById('vessel-list');
+  if (!el) return;
+  // header
+  el.innerHTML = `
+    <div style="display:grid;grid-template-columns:2fr 1.5fr 1fr 1fr 1fr 1fr 1fr auto;gap:1rem;padding:0 1.25rem 8px;font-size:0.7rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.08em;">
+      <span>Vessel / Carrier</span><span>Route</span><span>ETD</span><span>ETA</span><span>Reefer Slots</span><span>Price/TEU</span><span>Green</span><span>Status</span>
+    </div>
+    ${list.map(v => {
+      const eta = new Date(v.etd);
+      eta.setDate(eta.getDate() + v.durationDays);
+      const etaStr = eta.toISOString().slice(0,10);
+      const fillPct = Math.round((v.reeferSlots / Math.max(v.slots,1)) * 100);
+      return `
+        <div class="vessel-row">
+          <div><div class="vessel-name">${v.vessel}</div><div class="vessel-carrier">${v.carrier}</div></div>
+          <div class="vessel-route">${v.from} → ${v.to.replace('_',' ')}</div>
+          <div class="vessel-date">${v.etd}</div>
+          <div class="vessel-date">${etaStr}</div>
+          <div class="slots-indicator">
+            <span style="font-size:0.8rem;font-weight:700">${v.reeferSlots}</span>
+            <div class="slots-bar"><div class="slots-bar-inner" style="width:${fillPct}%"></div></div>
+          </div>
+          <div style="font-weight:700;font-size:0.875rem">$${v.pricePerTEU}</div>
+          <span class="route-badge badge-green">${v.greenRating}</span>
+          <span class="vessel-status ${v.status==='ON_TIME'?'vs-ontime':'vs-delayed'}">${v.status==='ON_TIME'?'✓ On Time':'⚠️ Delayed'}</span>
+        </div>`;
+    }).join('')}`;
+}
+
+function filterVessels() {
+  const port = document.getElementById('vessel-port-filter').value;
+  const dest = document.getElementById('vessel-dest-filter').value;
+  let list = VESSELS;
+  if (port !== 'all') list = list.filter(v => v.from === port);
+  if (dest !== 'all') list = list.filter(v => v.to === dest);
+  renderVessels(list);
+}
+
+// ════════════════════════════════════════════════════════
+// ORDER MATCHING
+// ════════════════════════════════════════════════════════
+function renderOrders() {
+  const tbody = document.getElementById('orders-tbody');
+  if (!tbody) return;
+  tbody.innerHTML = ORDERS.map(o => {
+    const statusClass = { STORED:'status-stored', IN_TRANSIT:'status-transit', PENDING_VESSEL:'status-pending', MATCHING:'status-matching' }[o.status] || '';
+    const statusLabel = { STORED:'📦 Stored', IN_TRANSIT:'🚛 In Transit', PENDING_VESSEL:'⏳ Awaiting Vessel', MATCHING:'🔗 AI Matching' }[o.status] || o.status;
+    return `
+      <tr>
+        <td><span style="font-weight:700;font-size:0.8rem">${o.id}</span></td>
+        <td style="font-size:0.8rem">${o.shipper}</td>
+        <td style="font-size:0.8rem">${o.product}</td>
+        <td style="font-weight:700">${o.qty}T</td>
+        <td style="font-size:0.8rem;color:var(--text-dim)">${o.origin}</td>
+        <td style="font-size:0.8rem">${o.market}</td>
+        <td style="font-size:0.8rem;color:${new Date(o.deadline)<new Date(Date.now()+3*86400000)?'var(--red)':'var(--text-dim)'}">${o.deadline}</td>
+        <td><span class="status-pill ${statusClass}">${statusLabel}</span></td>
+        <td><button class="btn btn-outline btn-sm">View</button></td>
+      </tr>`;
+  }).join('');
+}
+
+function runMatching() {
+  const btn = event.target;
+  btn.textContent = '⏳ AI Matching...';
+  btn.disabled = true;
+  setTimeout(() => {
+    btn.textContent = '✓ Groups Ready';
+    btn.style.background = 'var(--green-dark)';
+    btn.style.color = 'var(--green-neon)';
+    renderMatchGroups();
+    setTimeout(() => {
+      btn.textContent = '🧠 Run AI Match';
+      btn.style.background = '';
+      btn.style.color = '';
+      btn.disabled = false;
+    }, 3000);
+  }, 2000);
+}
+
+function renderMatchGroups() {
+  const el = document.getElementById('match-groups-container');
+  if (!el) return;
+  const groups = [
+    {
+      id:"GRP-001", orders:[ORDERS[0],ORDERS[4]], totalTons:54, fillRate:98, savings:48, co2Saved:1284,
+      compatible: true, vessel:"SITC BEIJING (Jun-01 → Osaka)", issue:null
+    },
+    {
+      id:"GRP-002", orders:[ORDERS[3],ORDERS[5]], totalTons:20, fillRate:91, savings:42, co2Saved:640,
+      compatible: true, vessel:"PIL SINGAPORE (Jun-01 → Singapore)", issue:null
+    },
+    {
+      id:"GRP-003", orders:[ORDERS[1],ORDERS[2]], totalTons:58, fillRate:100, savings:0, co2Saved:0,
+      compatible: false, vessel:"Separate containers required", issue:"🌡️ Temperature mismatch: Mango (+10°C) vs Coffee (+15°C). Odor conflict: Coffee STRONG absorber."
+    }
+  ];
+
+  el.innerHTML = groups.map(g => `
+    <div class="match-group ${g.compatible?'viable':''}">
+      <div class="match-header">
+        <div>
+          <div style="font-weight:700;font-size:0.9rem">${g.id} — ${g.orders.length} Orders</div>
+          <div style="font-size:0.75rem;color:var(--text-muted);margin-top:2px">🚢 ${g.vessel}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <div style="font-size:0.8rem;color:var(--text-dim)">${g.totalTons}T / 22T</div>
+          <div class="fill-bar" style="width:100px"><div class="fill-bar-inner" style="width:${g.fillRate}%"></div></div>
+          <div style="font-size:0.8rem;font-weight:700;color:${g.fillRate>=80?'var(--green-neon)':'var(--amber)'}">${g.fillRate}%</div>
+          <span class="route-badge ${g.compatible?'badge-green':'badge-red'}">${g.compatible?'✓ Compatible':'✗ Incompatible'}</span>
+        </div>
+      </div>
+      ${g.issue ? `<div style="background:rgba(255,71,87,0.08);border:1px solid rgba(255,71,87,0.2);border-radius:8px;padding:10px 12px;font-size:0.8rem;color:var(--red);margin-bottom:10px;">⚠️ ${g.issue}</div>` : ''}
+      <div class="match-orders">
+        ${g.orders.map(o => `
+          <div class="match-order-item">
+            <span style="font-weight:700;font-size:0.78rem">${o.id}</span>
+            <span style="color:var(--text-dim);font-size:0.78rem">${o.product}</span>
+            <span style="font-weight:700">${o.qty}T</span>
+            <span style="color:var(--text-muted);font-size:0.75rem">${o.shipper}</span>
+            <span class="compat-tag ${g.compatible?'compat-ok':'compat-warn'}">${g.compatible?'✓ OK':'✗ Conflict'}</span>
+          </div>`).join('')}
+      </div>
+      ${g.compatible ? `
+        <div style="margin-top:12px;display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:rgba(0,255,136,0.05);border-radius:8px;border:1px solid rgba(0,255,136,0.1);">
+          <span style="font-size:0.8rem;color:var(--green-neon)">🌿 CO₂ saved: ${g.co2Saved.toLocaleString()}kg · Cost savings: ~${g.savings}%</span>
+          <button class="btn btn-primary btn-sm">Confirm & Book</button>
+        </div>` : `
+        <div style="margin-top:12px;display:flex;gap:8px;">
+          <button class="btn btn-outline btn-sm">🔀 Find Alternative</button>
+          <button class="btn btn-outline btn-sm">📦 Book Separately</button>
+        </div>`}
+    </div>`).join('');
+}
+
+function renderCompatMatrix() {
+  const el = document.getElementById('compat-matrix');
+  if (!el) return;
+  const prods = ['🦐 Shrimp','🐟 Pangasius','🥭 Mango','🌵 Durian','🌾 Rice','☕ Coffee'];
+  const matrix = [
+    ['Y','Y','N(T,M)','N(T,M)','N(T,M)','N(T,M)'],
+    ['Y','Y','N(T,M)','N(T,M)','N(T,M)','N(T,M)'],
+    ['N(T,M)','N(T,M)','Y','N(M,E)','Y','N(M,T)'],
+    ['N(T,M)','N(T,M)','N(M,E)','Y','N(M)','N(M)'],
+    ['N(T,M)','N(T,M)','Y','N(M)','Y','Y'],
+    ['N(T,M)','N(T,M)','N(M,T)','N(M)','Y','Y'],
+  ];
+
+  el.innerHTML = `
+    <div style="overflow-x:auto">
+      <table style="border-collapse:collapse;width:100%;font-size:0.78rem">
+        <thead>
+          <tr>
+            <th style="padding:8px 10px;text-align:left;border-bottom:1px solid var(--border);color:var(--text-muted)">Product</th>
+            ${prods.map(p => `<th style="padding:8px 10px;text-align:center;border-bottom:1px solid var(--border);color:var(--text-muted);font-size:0.72rem">${p}</th>`).join('')}
+          </tr>
+        </thead>
+        <tbody>
+          ${prods.map((p, i) => `
+            <tr>
+              <td style="padding:8px 10px;font-weight:700;border-bottom:1px solid var(--border)">${p}</td>
+              ${matrix[i].map((v,j) => `<td style="padding:8px 10px;text-align:center;border-bottom:1px solid var(--border)">
+                ${v === 'Y' 
+                  ? `<span style="color:var(--green-neon);font-weight:700">✓</span>`
+                  : `<span style="color:var(--red);font-size:0.7rem;font-weight:600">${v}</span>`}
+              </td>`).join('')}
+            </tr>`).join('')}
+        </tbody>
+      </table>
+      <div style="margin-top:1rem;display:flex;gap:1rem;font-size:0.75rem;color:var(--text-dim)">
+        <span><span style="color:var(--green-neon)">Y</span> = Compatible</span>
+        <span><span style="color:var(--red)">N(T)</span> = Temperature conflict</span>
+        <span><span style="color:var(--red)">N(M)</span> = Odor conflict</span>
+        <span><span style="color:var(--red)">N(E)</span> = Ethylene conflict</span>
+      </div>
+    </div>`;
+}
+
+// ════════════════════════════════════════════════════════
+// ALERTS
+// ════════════════════════════════════════════════════════
+function renderAlerts() {
+  const el = document.getElementById('alerts-container');
+  if (!el) return;
+  el.innerHTML = ALERTS.map(a => `
+    <div class="alert-card ${a.severity.toLowerCase()}">
+      <div class="alert-icon" style="font-size:1.5rem">${a.icon}</div>
+      <div class="alert-content">
+        <div class="alert-title">${a.title}</div>
+        <div class="alert-desc">${a.desc}</div>
+        <div class="alert-action"><button class="btn btn-outline btn-sm" style="margin-top:8px">${a.action} →</button></div>
+      </div>
+    </div>`).join('');
+}
+
+// ════════════════════════════════════════════════════════
+// BACKHAUL
+// ════════════════════════════════════════════════════════
+function renderBackhaul() {
+  const el = document.getElementById('backhaul-list');
+  if (!el) return;
+  el.innerHTML = BACKHAUL_MATCHES.map(b => `
+    <div class="backhaul-card">
+      <div class="truck-icon">🚛</div>
+      <div class="bh-info">
+        <div class="bh-route">${b.truck}</div>
+        <div class="bh-sub">${b.from} · ${b.cargo}</div>
+        <div style="font-size:0.72rem;color:var(--text-muted);margin-top:3px">📍 ${b.distKm}km · ⏰ Available ${b.eta}</div>
+      </div>
+      <div class="bh-earning">
+        <div class="bh-amount">+${b.earningVND}</div>
+        <div class="bh-co2">🌿 ↓ ${b.co2Avoided} CO₂</div>
+        <button class="btn btn-primary btn-sm" style="margin-top:6px" onclick="claimBackhaul(this)">Claim</button>
+      </div>
+    </div>`).join('');
+}
+
+function claimBackhaul(btn) {
+  btn.textContent = '✓ Claimed!';
+  btn.disabled = true;
+  btn.style.background = 'var(--green-dark)';
+}
+
+// ════════════════════════════════════════════════════════
+// GREEN PAGE
+// ════════════════════════════════════════════════════════
+function renderGreenPage() {
+  const el1 = document.getElementById('co2-breakdown');
+  if (el1) {
+    const modes = [
+      { label:'🚛 Diesel Truck', pct:38, color:'#f5a623' },
+      { label:'🚢 Sea Freight', pct:28, color:'#4facfe' },
+      { label:'🏭 Cold Storage', pct:18, color:'#00d4aa' },
+      { label:'⚡ Electric Fleet', pct:9, color:'#00ff88' },
+      { label:'☀️ Solar Warehouse', pct:7, color:'#a8ff78' },
+    ];
+    el1.innerHTML = modes.map(m => `
+      <div style="margin-bottom:12px">
+        <div style="display:flex;justify-content:space-between;margin-bottom:4px;font-size:0.8rem">
+          <span>${m.label}</span><span style="font-weight:700;color:${m.color}">${m.pct}%</span>
+        </div>
+        <div style="background:var(--border);border-radius:4px;height:8px;overflow:hidden">
+          <div style="width:${m.pct}%;height:100%;background:${m.color};border-radius:4px;transition:width 1s ease"></div>
+        </div>
+      </div>`).join('');
+  }
+
+  const el2 = document.getElementById('co2-trend');
+  if (el2) {
+    const months = ['Jan','Feb','Mar','Apr','May','Jun'];
+    const vals = [820, 940, 1050, 1100, 1220, 1284];
+    const max = Math.max(...vals);
+    el2.innerHTML = `
+      <div style="display:flex;align-items:flex-end;gap:12px;height:160px;padding-bottom:8px">
+        ${months.map((m,i) => `
+          <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:6px">
+            <div style="font-size:0.7rem;color:var(--green-neon);font-weight:700">${vals[i]}T</div>
+            <div style="width:100%;background:linear-gradient(180deg,var(--green-neon),var(--green-dark));border-radius:6px 6px 0 0;height:${Math.round((vals[i]/max)*120)}px;transition:height 1s ease"></div>
+            <div style="font-size:0.7rem;color:var(--text-muted)">${m}</div>
+          </div>`).join('')}
+      </div>
+      <div style="font-size:0.75rem;color:var(--text-dim);text-align:center;margin-top:6px">Monthly CO₂ avoided (tons) — 2025</div>`;
+  }
+}
+
+// ════════════════════════════════════════════════════════
+// AI ASSISTANT
+// ════════════════════════════════════════════════════════
+const AI_RESPONSES = {
+  default: (q) => buildAIAnswer(q),
+};
+
+function buildAIAnswer(question) {
+  const q = question.toLowerCase();
+  
+  if (q.includes('shrimp') && q.includes('osaka')) {
+    return `📦 <strong>Optimal route: Frozen Shrimp (20T) → Osaka</strong><br><br>
+🏭 <strong>Origin:</strong> Kien Giang Shrimp Hub (WH-009) · -25°C → -18°C · 78/100 Green Score<br>
+🚛 <strong>Leg 1 — Road:</strong> 350km to SGN Cat Lai · 7h · Reefer 20T · 329 kg CO₂<br>
+🚢 <strong>Leg 2 — Sea:</strong> SITC BEIJING (SGN → Osaka) · ETD Jun-01 · 7 days · 18 reefer slots<br><br>
+🌿 <strong>Green Score: 87/100</strong> · CO₂ saved: 34% vs standard<br>
+💰 <strong>Estimated Cost:</strong> ~$5,800 (incl. backhaul discount)<br>
+🔄 <strong>Bonus:</strong> Backhaul match available — save extra 38% on road freight!<br><br>
+Ready to book? Click <em>"Book This Route"</em> in the Route Optimizer tab.`;
+  }
+  
+  if (q.includes('durian') && (q.includes('shrimp') || q.includes('together') || q.includes('container'))) {
+    return `⚠️ <strong>Compatibility Check: Durian + Shrimp</strong><br><br>
+❌ <strong>NOT COMPATIBLE</strong> — Multiple conflicts detected:<br>
+• <strong>Temperature:</strong> Durian needs +4°C to +8°C; Shrimp needs -25°C to -18°C (33°C gap — impossible)<br>
+• <strong>Odor:</strong> Durian has EXTREME odor — will contaminate any seafood product permanently<br>
+• <strong>Risk:</strong> Total cargo loss if loaded together<br><br>
+✅ <strong>AI Recommendation:</strong><br>
+• Book separate reefer containers<br>
+• Shrimp: Standard -20°C reefer<br>
+• Durian: Specialty 4–8°C reefer with vented panels<br><br>
+Want me to find matching vessels for both cargos separately?`;
+  }
+  
+  if (q.includes('congestion') || q.includes('port')) {
+    return `🚨 <strong>Port Congestion Response Plan</strong><br><br>
+<strong>Current SGN status:</strong> 78% capacity · 2 delayed vessels<br><br>
+📋 <strong>AI recommends:</strong><br>
+1. 🏭 Move cargo to buffer warehouse at ICD Transimex (10.8km from port) — saves $180/day in port fees<br>
+2. 🚢 Re-route via COSCO TIANJIN (Jun-08) — 6-day delay but saves $340/container port storage<br>
+3. 🔄 Activate backhaul match — 3 trucks returning to port area available now<br><br>
+⏰ <strong>Buffer timing:</strong> Keep cargo in cold storage until 48h before vessel ETD.<br>
+📞 I can auto-send booking requests to WH-004 and WH-003. Confirm?`;
+  }
+  
+  if (q.includes('backhaul') || q.includes('truck') || q.includes('empty')) {
+    return `🔄 <strong>Backhaul Matches Near Can Tho — Right Now</strong><br><br>
+Found 5 trucks completing import deliveries within 150km:<br><br>
+🚛 <strong>Truck CT-1193</strong> — Delivering Thai fruit to Can Tho · Available 14:00<br>
+&nbsp;&nbsp;&nbsp;→ Match: 15T mango to SGN port · Distance: 165km · Earn: +₫30.2M<br>
+&nbsp;&nbsp;&nbsp;→ Your freight savings: ~38% · CO₂ avoided: 640kg<br><br>
+🚛 <strong>Truck TG-0482</strong> — Completing delivery in Tien Giang · Available 22:00<br>
+&nbsp;&nbsp;&nbsp;→ Match: 12T dragon fruit to SGN port · Distance: 72km<br><br>
+Shall I send booking requests to both trucks?`;
+  }
+  
+  if (q.includes('co2') || q.includes('carbon') || q.includes('emission')) {
+    return `🌿 <strong>CO₂ Calculator: 30T Mango from Da Lat → Shanghai</strong><br><br>
+<strong>Road leg (295km):</strong><br>
+• Diesel truck 20T: 30T × 295km × 0.047 = <span style="color:#f5a623">416 kg CO₂</span><br>
+• Electric truck option: 30T × 295km × 0.015 = <span style="color:#00ff88">133 kg CO₂</span> (↓68%)<br><br>
+<strong>Sea leg (SGN → Shanghai, 1,820nm):</strong><br>
+• 2× 20ft reefer containers: 2 TEU × 1,820nm × 0.025 = <span style="color:#4facfe">91 kg CO₂</span><br><br>
+<strong>Cold storage (3 days, solar warehouse):</strong><br>
+• 30 pallets × 3 days × 0.008 = <span style="color:#00ff88">0.7 kg CO₂</span><br><br>
+📊 <strong>Total: 508 kg CO₂</strong> (road diesel) or <strong>225 kg CO₂</strong> (road electric)<br>
+🌿 <strong>Savings vs standard: 34–56%</strong>`;
+  }
+
+  if (q.includes('season') || q.includes('peak') || q.includes('month')) {
+    const month = new Date().getMonth();
+    const peaks = ['Shrimp, Coffee', 'Coffee, Dragon Fruit', 'Dragon Fruit, Mango', 'Mango, Dragon Fruit', 'Mango, Durian', 'Durian', 'Dragon Fruit, Durian', 'Dragon Fruit', 'Dragon Fruit', 'Rice', 'Shrimp, Rice', 'Shrimp, Coffee'];
+    return `🌾 <strong>Peak Season Products — ${new Date().toLocaleString('en',{month:'long'})}</strong><br><br>
+📈 <strong>Current high volume:</strong> ${peaks[month]}<br><br>
+⚠️ <strong>Booking recommendation:</strong><br>
+• Shrimp (Kien Giang): Book 7 days ahead — 95% fill rate expected<br>
+• Dragon Fruit (Ninh Thuan): Book 5 days ahead — solar warehouse priority<br><br>
+📅 <strong>Upcoming peaks:</strong><br>
+• Next 4 weeks: Mango volumes rising 40% (Mekong Delta)<br>
+• Pre-book WH-005, WH-003 by ${new Date(Date.now() + 5*86400000).toLocaleDateString()}<br><br>
+Want me to create pre-booking alerts for your preferred routes?`;
+  }
+
+  return `🤖 <strong>ColdRoute AI Analysis</strong><br><br>
+I understand you're asking about: <em>"${question}"</em><br><br>
+Based on current network data:<br>
+• 📦 12 active cold warehouses available<br>
+• 🚢 10 vessel departures in next 14 days<br>
+• 🔄 5 backhaul matches active right now<br>
+• 🌿 Average 34% CO₂ reduction across our network<br><br>
+For precise analysis, try asking:<br>
+• "Best route for [product] from [origin] to [market]"<br>
+• "Can I ship [product A] and [product B] together?"<br>
+• "Find backhaul near [location]"<br>
+• "CO₂ footprint for my shipment"`;
+}
+
+async function sendAIMessage() {
+  const input = document.getElementById('ai-input');
+  const msg = input.value.trim();
+  if (!msg) return;
+  input.value = '';
+
+  const messagesDiv = document.getElementById('ai-chat-messages');
+
+  // Add user message
+  messagesDiv.innerHTML += `
+    <div class="msg user">
+      <div class="msg-avatar">👤</div>
+      <div class="msg-bubble">${msg}</div>
+    </div>`;
+
+  // Add thinking indicator
+  messagesDiv.innerHTML += `
+    <div class="msg ai" id="thinking-msg">
+      <div class="msg-avatar">🧊</div>
+      <div class="msg-bubble"><div class="thinking-dots"><span></span><span></span><span></span></div></div>
+    </div>`;
+  messagesDiv.scrollTop = messagesDiv.scrollHeight;
+
+  try {
+    const response = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-20250514",
+        max_tokens: 1000,
+        system: `You are ColdRoute AI, an intelligent cold chain logistics assistant for Vietnam's agricultural export industry. 
+        You help farmers, SMEs, and logistics operators optimize their cold chain from farm to port.
+        
+        KEY CONTEXT:
+        - Platform connects farm buffer warehouses → reefer trucks → sea vessels
+        - Focus on: route optimization, cargo compatibility, CO₂ reduction, backhaul matching, congestion alerts
+        - Vietnam exports: shrimp, pangasius, dragon fruit, durian, mango, rice, coffee
+        - Main ports: SGN (Cat Lai), HPH (Hai Phong), DAD (Da Nang)
+        - CO₂ factors: Diesel truck 0.047 kg/ton·km, Sea vessel 0.025 kg/TEU·nm, Electric truck 0.015 kg/ton·km
+        
+        COMPATIBILITY RULES (critical for cargo grouping):
+        - Seafood (strong odor, -18 to -25°C) cannot mix with fresh produce
+        - Durian (extreme odor) cannot mix with anything
+        - Temperature ranges must overlap within 5°C
+        - Ethylene producers (mango, dragon fruit) cannot be with absorbers (coffee)
+        
+        Respond concisely with actionable recommendations. Use emojis for clarity. Format with bold headers. Be specific with numbers.`,
+        messages: [{ role: "user", content: msg }]
+      })
+    });
+    
+    const data = await response.json();
+    const aiText = data.content?.[0]?.text || buildAIAnswer(msg);
+    
+    document.getElementById('thinking-msg')?.remove();
+    messagesDiv.innerHTML += `
+      <div class="msg ai">
+        <div class="msg-avatar">🧊</div>
+        <div class="msg-bubble">${aiText.replace(/\n/g,'<br>').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')}</div>
+      </div>`;
+  } catch(e) {
+    document.getElementById('thinking-msg')?.remove();
+    const fallback = buildAIAnswer(msg);
+    messagesDiv.innerHTML += `
+      <div class="msg ai">
+        <div class="msg-avatar">🧊</div>
+        <div class="msg-bubble">${fallback}</div>
+      </div>`;
+  }
+  messagesDiv.scrollTop = messagesDiv.scrollHeight;
+}
+
+function sendSuggestion(text) {
+  document.getElementById('ai-input').value = text;
+  sendAIMessage();
+}
+
+// ════════════════════════════════════════════════════════
+// MISC UTILITIES
+// ════════════════════════════════════════════════════════
+function setMapView(type) {
+  document.querySelectorAll('.map-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+}
+
+function showPortInfo(id) {
+  const portNames = { SGN: "Tan Cang Cat Lai — 6.5M TEU/yr · 2,400 reefer slots", HPH:"Hai Phong Port — 6M TEU/yr · 1,800 reefer slots", DAD:"Tien Sa Da Nang — 800K TEU/yr · 400 reefer slots" };
+  alert(`📍 ${portNames[id] || id}`);
+}
+
+function showWarehouseInfo(id) {
+  const wh = WAREHOUSES.find(w => w.id === id);
+  if (wh) alert(`🏭 ${wh.name}\n📍 ${wh.province}\n🌡️ ${wh.tempRange[0]}°C to ${wh.tempRange[1]}°C\n⚖️ ${wh.available}/${wh.capacity} tons available\n🌿 Green Score: ${wh.greenScore}`);
+}
+
+// ════════════════════════════════════════════════════════
+// SET DEFAULT DATE + INIT
+// ════════════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', () => {
+  const d = document.getElementById('opt-deadline');
+  if (d) {
+    const future = new Date();
+    future.setDate(future.getDate() + 14);
+    d.value = future.toISOString().slice(0,10);
+  }
+  renderDashboardWidgets();
+});
+</script>
+</body>
+</html>
