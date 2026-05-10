@@ -1,0 +1,634 @@
+<!-- Vessel Live Tracker -->
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#050d0a;--bg2:#0a1510;--surf:#0f1f17;--surf2:#162a1e;
+  --brd:#1e3528;--brdl:#2a4a38;
+  --gn:#00ff88;--gm:#00cc6a;--gd:#00804a;--gdim:rgba(0,255,136,.08);
+  --tl:#00d4aa;--am:#f5a623;--rd:#ff4757;--bl:#4facfe;
+  --tx:#e8f5ee;--txd:#7aaa90;--txm:#4a7060;
+  --ff:'Syne',sans-serif;--fb:'DM Sans',sans-serif;
+  --r:12px;--rl:20px;
+}
+body{font-family:var(--fb);background:var(--bg);color:var(--tx);min-height:100vh;padding:0;}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.4)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes shipMove{0%{opacity:.6}50%{opacity:1}100%{opacity:.6}}
+@keyframes wake{0%{opacity:.5;transform:scaleX(1)}100%{opacity:0;transform:scaleX(2.5)}}
+@keyframes dashFlow{to{stroke-dashoffset:-16}}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+
+.topbar{
+  position:sticky;top:0;z-index:200;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 1.5rem;height:58px;
+  background:rgba(5,13,10,.95);backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--brd);
+}
+.logo{display:flex;align-items:center;gap:10px;font-family:var(--ff);font-size:1.15rem;font-weight:800;color:#fff}
+.logo-icon{width:32px;height:32px;background:linear-gradient(135deg,var(--gn),var(--tl));border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:1rem}
+.logo span{color:var(--gn)}
+.gb{display:flex;align-items:center;gap:6px;background:rgba(0,255,136,.1);border:1px solid rgba(0,255,136,.3);border-radius:20px;padding:4px 12px;font-size:.72rem;font-weight:700;color:var(--gn)}
+.gb::before{content:"";width:6px;height:6px;background:var(--gn);border-radius:50%;animation:pulse 2s infinite}
+
+.layout{display:grid;grid-template-columns:320px 1fr;min-height:calc(100vh - 58px)}
+
+/* SIDEBAR */
+.sidebar{background:var(--bg2);border-right:1px solid var(--brd);overflow-y:auto;display:flex;flex-direction:column;}
+.sb-head{padding:1.25rem 1.25rem .75rem;border-bottom:1px solid var(--brd)}
+.sb-title{font-family:var(--ff);font-size:1rem;font-weight:700;margin-bottom:.25rem}
+.sb-sub{font-size:.75rem;color:var(--txd)}
+.booking-card{
+  margin:1rem;background:var(--surf);border:1px solid var(--brd);border-radius:var(--r);overflow:hidden;
+  cursor:pointer;transition:all .2s;
+}
+.booking-card:hover{border-color:var(--brdl);transform:translateY(-1px)}
+.booking-card.active{border-color:rgba(0,255,136,.5);box-shadow:0 0 16px rgba(0,255,136,.08)}
+.bc-top{padding:1rem 1.25rem;border-bottom:1px solid var(--brd)}
+.bc-vessel{font-family:var(--ff);font-weight:700;font-size:.9rem;margin-bottom:3px}
+.bc-route{font-size:.75rem;color:var(--txd)}
+.bc-badges{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+.badge{display:inline-flex;align-items:center;gap:3px;font-size:.68rem;font-weight:700;padding:3px 7px;border-radius:6px}
+.bg-green{background:rgba(0,255,136,.12);color:var(--gn);border:1px solid rgba(0,255,136,.25)}
+.bg-blue{background:rgba(79,172,254,.12);color:var(--bl);border:1px solid rgba(79,172,254,.25)}
+.bg-amber{background:rgba(245,166,35,.12);color:var(--am);border:1px solid rgba(245,166,35,.25)}
+.bg-red{background:rgba(255,71,87,.12);color:var(--rd);border:1px solid rgba(255,71,87,.25)}
+.bg-teal{background:rgba(0,212,170,.12);color:var(--tl);border:1px solid rgba(0,212,170,.25)}
+.bc-mid{padding:.875rem 1.25rem;border-bottom:1px solid var(--brd);display:grid;grid-template-columns:1fr 1fr;gap:.5rem}
+.bc-stat .lbl{font-size:.68rem;color:var(--txm);text-transform:uppercase;letter-spacing:.05em}
+.bc-stat .val{font-family:var(--ff);font-weight:700;font-size:.9rem;margin-top:1px}
+.bc-stat .val.green{color:var(--gn)}
+.bc-stat .val.amber{color:var(--am)}
+.bc-progress{padding:.875rem 1.25rem}
+.progress-label{display:flex;justify-content:space-between;font-size:.72rem;color:var(--txd);margin-bottom:5px}
+.progress-bar{background:var(--brd);border-radius:4px;height:7px;overflow:hidden;position:relative}
+.progress-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--gd),var(--gn));transition:width 1s ease;position:relative}
+.progress-fill::after{content:"";position:absolute;right:-1px;top:50%;transform:translateY(-50%);width:12px;height:12px;background:var(--gn);border-radius:50%;border:2px solid var(--bg2);box-shadow:0 0 8px var(--gn)}
+.leg-list{padding:0 1.25rem .875rem;display:flex;flex-direction:column;gap:6px}
+.leg-item{display:flex;align-items:center;gap:8px;padding:6px 10px;background:var(--bg2);border-radius:7px;font-size:.75rem}
+.leg-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.leg-dot.done{background:var(--gn)}
+.leg-dot.active{background:var(--am);animation:blink 1s infinite}
+.leg-dot.upcoming{background:var(--brd)}
+.leg-txt{flex:1;color:var(--txd)}
+.leg-txt strong{color:var(--tx);font-weight:600}
+.leg-time{color:var(--txm);font-size:.68rem}
+.reefer-box{margin:0 1rem 1rem;padding:1rem 1.25rem;background:rgba(0,255,136,.04);border:1px solid rgba(0,255,136,.15);border-radius:var(--r)}
+.reefer-title{font-size:.72rem;font-weight:700;color:var(--gn);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.75rem;display:flex;align-items:center;gap:6px}
+.reefer-title::before{content:"";width:6px;height:6px;background:var(--gn);border-radius:50%;animation:pulse 2s infinite}
+.reefer-grid{display:grid;grid-template-columns:1fr 1fr;gap:.6rem}
+.reefer-item .rl{font-size:.68rem;color:var(--txm)}
+.reefer-item .rv{font-family:var(--ff);font-weight:700;font-size:1rem;margin-top:1px}
+.reefer-item .rv.ok{color:var(--gn)}
+.reefer-item .rv.warn{color:var(--am)}
+
+/* MAP AREA */
+.map-area{position:relative;overflow:hidden;background:linear-gradient(180deg,#051510,#040e0a)}
+.map-svg{width:100%;height:100%;display:block}
+.map-toolbar{
+  position:absolute;top:14px;left:14px;z-index:10;
+  display:flex;gap:6px;flex-wrap:wrap;
+}
+.map-btn{
+  background:rgba(5,13,10,.9);border:1px solid var(--brd);
+  border-radius:7px;padding:5px 11px;color:var(--txd);
+  font-size:.72rem;font-weight:700;cursor:pointer;transition:all .2s;
+  font-family:var(--fb);letter-spacing:.03em;
+}
+.map-btn:hover,.map-btn.active{border-color:var(--gn);color:var(--gn);background:rgba(0,255,136,.06)}
+.map-info-panel{
+  position:absolute;top:14px;right:14px;z-index:10;
+  background:rgba(5,13,10,.94);border:1px solid var(--brd);
+  border-radius:var(--r);padding:1rem 1.25rem;min-width:220px;
+  backdrop-filter:blur(10px);animation:fadeIn .3s ease;
+}
+.mip-title{font-family:var(--ff);font-size:.85rem;font-weight:700;margin-bottom:.75rem;display:flex;align-items:center;gap:8px}
+.mip-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;font-size:.75rem}
+.mip-row .mk{color:var(--txm)}
+.mip-row .mv{color:var(--tx);font-weight:600}
+.map-legend{
+  position:absolute;bottom:14px;right:14px;z-index:10;
+  background:rgba(5,13,10,.9);border:1px solid var(--brd);
+  border-radius:10px;padding:10px 13px;
+}
+.li{display:flex;align-items:center;gap:7px;font-size:.72rem;color:var(--txd);margin-bottom:5px}
+.li:last-child{margin-bottom:0}
+.ld{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.speed-badge{
+  position:absolute;bottom:14px;left:14px;z-index:10;
+  background:rgba(5,13,10,.9);border:1px solid var(--brd);
+  border-radius:10px;padding:10px 14px;display:flex;align-items:center;gap:10px;
+}
+.speed-val{font-family:var(--ff);font-size:1.4rem;font-weight:800;color:var(--gn)}
+.speed-unit{font-size:.68rem;color:var(--txm);line-height:1.3}
+.eta-banner{
+  position:absolute;bottom:14px;left:50%;transform:translateX(-50%);z-index:10;
+  background:rgba(5,13,10,.92);border:1px solid rgba(0,255,136,.25);
+  border-radius:10px;padding:8px 18px;display:flex;align-items:center;gap:14px;
+  white-space:nowrap;backdrop-filter:blur(10px);
+}
+.eta-item{display:flex;flex-direction:column;align-items:center}
+.eta-val{font-family:var(--ff);font-weight:800;font-size:.9rem;color:var(--gn)}
+.eta-lbl{font-size:.65rem;color:var(--txm)}
+.eta-sep{width:1px;height:28px;background:var(--brd)}
+.sim-control{
+  position:absolute;top:56px;left:14px;z-index:10;
+  background:rgba(5,13,10,.9);border:1px solid var(--brd);
+  border-radius:7px;padding:6px 10px;display:flex;align-items:center;gap:8px;
+}
+.sim-label{font-size:.7rem;color:var(--txm)}
+.sim-select{background:transparent;border:none;color:var(--txd);font-size:.72rem;font-family:var(--fb);cursor:pointer;outline:none}
+.sim-select option{background:var(--surf)}
+</style>
+
+<div class="topbar">
+  <div class="logo"><div class="logo-icon">🧊</div>ColdRoute<span>AI</span></div>
+  <div style="font-family:var(--ff);font-weight:700;font-size:.85rem;color:var(--txd)">📦 My Bookings — Live Vessel Tracker</div>
+  <div class="gb">🛰️ Live Tracking</div>
+</div>
+
+<div class="layout">
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <div class="sb-head">
+    <div class="sb-title">Active Shipments</div>
+    <div class="sb-sub">3 vessels in transit · Click to track</div>
+  </div>
+
+  <!-- Booking 1: Active -->
+  <div class="booking-card active" onclick="selectVessel(0)">
+    <div class="bc-top">
+      <div class="bc-vessel">SITC BEIJING</div>
+      <div class="bc-route">SGN Cat Lai → Osaka, Japan 🇯🇵</div>
+      <div class="bc-badges">
+        <span class="badge bg-amber">🚢 At Sea</span>
+        <span class="badge bg-green">🌿 Green A-</span>
+        <span class="badge bg-green">✓ On Schedule</span>
+      </div>
+    </div>
+    <div class="bc-mid">
+      <div class="bc-stat"><div class="lbl">Order ID</div><div class="val">ORD-2025-001</div></div>
+      <div class="bc-stat"><div class="lbl">Cargo</div><div class="val">🦐 24T Shrimp</div></div>
+      <div class="bc-stat"><div class="lbl">Reefer Temp</div><div class="val green">-22.4°C ✓</div></div>
+      <div class="bc-stat"><div class="lbl">ETA Osaka</div><div class="val amber">Jun 08, 2025</div></div>
+    </div>
+    <div class="bc-progress">
+      <div class="progress-label"><span>SGN · Departed Jun 01</span><span id="pct0">46%</span></div>
+      <div class="progress-bar"><div class="progress-fill" id="pfill0" style="width:46%"></div></div>
+    </div>
+    <div class="leg-list">
+      <div class="leg-item"><div class="leg-dot done"></div><div class="leg-txt"><strong>Departed</strong> SGN Cat Lai</div><div class="leg-time">Jun 01 06:00</div></div>
+      <div class="leg-item"><div class="leg-dot active"></div><div class="leg-txt"><strong>At Sea</strong> South China Sea</div><div class="leg-time">Now</div></div>
+      <div class="leg-item"><div class="leg-dot upcoming"></div><div class="leg-txt"><strong>Passing</strong> Taiwan Strait</div><div class="leg-time">Jun 05 est.</div></div>
+      <div class="leg-item"><div class="leg-dot upcoming"></div><div class="leg-txt"><strong>Arrive</strong> Osaka Namba Port</div><div class="leg-time">Jun 08 est.</div></div>
+    </div>
+    <div class="reefer-box">
+      <div class="reefer-title">Reefer Container Telemetry</div>
+      <div class="reefer-grid">
+        <div class="reefer-item"><div class="rl">Temperature</div><div class="rv ok" id="temp0">-22.4°C</div></div>
+        <div class="reefer-item"><div class="rl">Humidity</div><div class="rv ok" id="hum0">87.2%</div></div>
+        <div class="reefer-item"><div class="rl">Power</div><div class="rv ok">Grid ✓</div></div>
+        <div class="reefer-item"><div class="rl">CO₂ alarm</div><div class="rv ok">None</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Booking 2 -->
+  <div class="booking-card" onclick="selectVessel(1)">
+    <div class="bc-top">
+      <div class="bc-vessel">PIL SINGAPORE</div>
+      <div class="bc-route">SGN Cat Lai → Singapore 🇸🇬</div>
+      <div class="bc-badges">
+        <span class="badge bg-teal">🚢 Approaching</span>
+        <span class="badge bg-green">🌿 Green A</span>
+      </div>
+    </div>
+    <div class="bc-mid">
+      <div class="bc-stat"><div class="lbl">Order ID</div><div class="val">ORD-2025-004</div></div>
+      <div class="bc-stat"><div class="lbl">Cargo</div><div class="val">🐉 12T Dragon Fruit</div></div>
+      <div class="bc-stat"><div class="lbl">Reefer Temp</div><div class="val green">+9.8°C ✓</div></div>
+      <div class="bc-stat"><div class="lbl">ETA</div><div class="val amber">Jun 03, 2025</div></div>
+    </div>
+    <div class="bc-progress">
+      <div class="progress-label"><span>SGN · Departed Jun 01</span><span>78%</span></div>
+      <div class="progress-bar"><div class="progress-fill" style="width:78%"></div></div>
+    </div>
+  </div>
+
+  <!-- Booking 3 -->
+  <div class="booking-card" onclick="selectVessel(2)">
+    <div class="bc-top">
+      <div class="bc-vessel">HAPAG EXPRESS</div>
+      <div class="bc-route">SGN Cat Lai → Rotterdam, EU 🇳🇱</div>
+      <div class="bc-badges">
+        <span class="badge bg-blue">🚢 Indian Ocean</span>
+        <span class="badge bg-green">🌿 Green A</span>
+      </div>
+    </div>
+    <div class="bc-mid">
+      <div class="bc-stat"><div class="lbl">Order ID</div><div class="val">ORD-2025-003</div></div>
+      <div class="bc-stat"><div class="lbl">Cargo</div><div class="val">☕ 40T Coffee</div></div>
+      <div class="bc-stat"><div class="lbl">Reefer Temp</div><div class="val green">+18.1°C ✓</div></div>
+      <div class="bc-stat"><div class="lbl">ETA</div><div class="val">Jun 30, 2025</div></div>
+    </div>
+    <div class="bc-progress">
+      <div class="progress-label"><span>SGN · Departed Jun 05</span><span>12%</span></div>
+      <div class="progress-bar"><div class="progress-fill" style="width:12%"></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- MAP AREA -->
+<div class="map-area" id="mapArea">
+  <svg id="mapSvg" class="map-svg" viewBox="0 0 900 620" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
+    <defs>
+      <radialGradient id="seaBg" cx="50%" cy="50%" r="70%">
+        <stop offset="0%" stop-color="#062014"/>
+        <stop offset="100%" stop-color="#030c08"/>
+      </radialGradient>
+      <filter id="glow2"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+      <filter id="glowS"><feGaussianBlur stdDeviation="5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    </defs>
+
+    <!-- Sea background -->
+    <rect width="900" height="620" fill="url(#seaBg)"/>
+
+    <!-- Grid -->
+    <g stroke="#0a1f14" stroke-width="0.5" opacity="0.6">
+      <line x1="0" y1="100" x2="900" y2="100"/><line x1="0" y1="200" x2="900" y2="200"/>
+      <line x1="0" y1="300" x2="900" y2="300"/><line x1="0" y1="400" x2="900" y2="400"/>
+      <line x1="0" y1="500" x2="900" y2="500"/>
+      <line x1="150" y1="0" x2="150" y2="620"/><line x1="300" y1="0" x2="300" y2="620"/>
+      <line x1="450" y1="0" x2="450" y2="620"/><line x1="600" y1="0" x2="600" y2="620"/>
+      <line x1="750" y1="0" x2="750" y2="620"/>
+    </g>
+
+    <!-- Land masses (simplified) -->
+    <!-- Vietnam -->
+    <path d="M270,90 L285,100 L295,120 L305,150 L310,175 L305,200 L315,225 L325,255 L320,280 L310,295 L300,310 L295,330 L285,350 L275,365 L260,375 L250,385 L240,390 L230,380 L220,360 L215,340 L220,315 L215,290 L208,265 L212,240 L220,215 L215,190 L218,165 L225,140 L235,115 L250,95 Z"
+      fill="#0d2518" stroke="#1a4030" stroke-width="1"/>
+    <!-- Thailand/Malaysia -->
+    <path d="M215,310 L230,320 L235,350 L230,380 L220,410 L218,450 L222,480 L215,490 L205,475 L200,455 L195,420 L198,395 L205,370 L210,345 Z"
+      fill="#0d2518" stroke="#1a4030" stroke-width="1"/>
+    <!-- Singapore island -->
+    <ellipse cx="236" cy="498" rx="12" ry="6" fill="#0f2d1c" stroke="#1a4030" stroke-width="1"/>
+    <!-- Borneo -->
+    <path d="M335,335 L375,305 L420,290 L450,300 L465,330 L460,365 L445,400 L415,420 L380,425 L350,415 L330,390 L320,365 Z"
+      fill="#0d2518" stroke="#1a4030" stroke-width="0.8"/>
+    <!-- Philippines -->
+    <path d="M480,130 L500,110 L510,130 L505,155 L490,165 Z" fill="#0d2518" stroke="#1a4030" stroke-width="0.8"/>
+    <path d="M470,195 L488,180 L498,200 L492,225 L475,230 Z" fill="#0d2518" stroke="#1a4030" stroke-width="0.8"/>
+    <path d="M500,240 L520,225 L535,250 L525,280 L505,285 Z" fill="#0d2518" stroke="#1a4030" stroke-width="0.8"/>
+    <!-- Taiwan -->
+    <ellipse cx="600" cy="145" rx="14" ry="28" fill="#0d2518" stroke="#1a4030" stroke-width="0.8" transform="rotate(-15,600,145)"/>
+    <!-- Japan -->
+    <path d="M720,60 L755,50 L775,70 L770,95 L755,105 L735,95 L720,80 Z" fill="#0d2518" stroke="#1a4030" stroke-width="0.8"/>
+    <path d="M760,110 L800,100 L820,125 L810,155 L785,160 L760,145 Z" fill="#0d2518" stroke="#1a4030" stroke-width="0.8"/>
+    <!-- China coast -->
+    <path d="M550,0 L600,20 L640,50 L660,80 L650,110 L620,105 L590,75 L560,40 L540,15 Z" fill="#0d2518" stroke="#1a4030" stroke-width="0.8"/>
+    <!-- Sumatra -->
+    <path d="M150,440 L200,420 L260,430 L290,455 L285,480 L255,495 L210,490 L175,475 L150,455 Z" fill="#0d2518" stroke="#1a4030" stroke-width="0.8"/>
+    <!-- Java -->
+    <path d="M290,510 L350,500 L400,505 L420,520 L400,535 L340,535 L290,525 Z" fill="#0d2518" stroke="#1a4030" stroke-width="0.8"/>
+
+    <!-- Route lines (animated dashes) -->
+    <!-- Route 0: SGN → Osaka -->
+    <path id="route0" d="M285,320 Q350,280 420,210 Q480,150 580,120 Q650,100 745,110"
+      fill="none" stroke="rgba(0,255,136,0.25)" stroke-width="1.5" stroke-dasharray="8,5">
+      <animate attributeName="stroke-dashoffset" from="0" to="-26" dur="2s" repeatCount="indefinite"/>
+    </path>
+    <!-- Route 1: SGN → Singapore -->
+    <path id="route1" d="M285,320 Q265,390 248,490"
+      fill="none" stroke="rgba(0,212,170,0.25)" stroke-width="1.5" stroke-dasharray="6,4">
+      <animate attributeName="stroke-dashoffset" from="0" to="-20" dur="1.5s" repeatCount="indefinite"/>
+    </path>
+    <!-- Route 2: SGN → Rotterdam (via Malacca, Indian Ocean) -->
+    <path id="route2" d="M285,320 Q260,400 230,480 Q180,510 120,490 Q60,460 30,400 Q10,350 20,280"
+      fill="none" stroke="rgba(79,172,254,0.2)" stroke-width="1.5" stroke-dasharray="8,6">
+      <animate attributeName="stroke-dashoffset" from="0" to="-28" dur="2.5s" repeatCount="indefinite"/>
+    </path>
+
+    <!-- Vessel 0: SITC BEIJING ~46% along route to Osaka -->
+    <g id="vessel0" style="cursor:pointer" onclick="selectVessel(0)">
+      <!-- Wake trail -->
+      <ellipse cx="0" cy="0" rx="20" ry="5" fill="rgba(0,255,136,0.06)" transform="translate(510,175) rotate(-30)">
+        <animate attributeName="rx" values="15;25;15" dur="2s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="0.1;0.05;0.1" dur="2s" repeatCount="indefinite"/>
+      </ellipse>
+      <!-- Pulse ring -->
+      <circle cx="510" cy="175" r="14" fill="none" stroke="rgba(0,255,136,0.4)" stroke-width="1">
+        <animate attributeName="r" values="12;22;12" dur="2.5s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="0.5;0;0.5" dur="2.5s" repeatCount="indefinite"/>
+      </circle>
+      <!-- Ship body -->
+      <g filter="url(#glow2)">
+        <polygon points="510,162 522,171 518,182 502,182 498,171" fill="#051510" stroke="#00ff88" stroke-width="2" stroke-linejoin="round"/>
+        <circle cx="510" cy="172" r="5" fill="#00ff88" opacity="0.95"/>
+      </g>
+      <!-- Label -->
+      <rect x="525" y="162" width="108" height="22" rx="5" fill="rgba(5,13,10,0.9)" stroke="rgba(0,255,136,0.4)" stroke-width="0.8"/>
+      <text x="579" y="174" text-anchor="middle" fill="#00ff88" font-size="10" font-weight="700" font-family="Syne">SITC BEIJING</text>
+      <rect x="525" y="183" width="108" height="16" rx="3" fill="rgba(0,255,136,0.06)" stroke="rgba(0,255,136,0.2)" stroke-width="0.5"/>
+      <text x="579" y="194" text-anchor="middle" fill="#7aaa90" font-size="9" font-family="DM Sans">46% · 46kn avg</text>
+    </g>
+
+    <!-- Vessel 1: PIL SINGAPORE ~78% along route to Singapore -->
+    <g id="vessel1" style="cursor:pointer;display:none" onclick="selectVessel(1)">
+      <circle cx="255" cy="455" r="12" fill="none" stroke="rgba(0,212,170,0.4)" stroke-width="1">
+        <animate attributeName="r" values="10;20;10" dur="2s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="0.5;0;0.5" dur="2s" repeatCount="indefinite"/>
+      </circle>
+      <g filter="url(#glow2)">
+        <polygon points="255,445 266,453 262,463 248,463 244,453" fill="#051510" stroke="#00d4aa" stroke-width="2" stroke-linejoin="round"/>
+        <circle cx="255" cy="454" r="5" fill="#00d4aa" opacity="0.95"/>
+      </g>
+      <rect x="270" y="445" width="112" height="22" rx="5" fill="rgba(5,13,10,0.9)" stroke="rgba(0,212,170,0.4)" stroke-width="0.8"/>
+      <text x="326" y="458" text-anchor="middle" fill="#00d4aa" font-size="10" font-weight="700" font-family="Syne">PIL SINGAPORE</text>
+      <rect x="270" y="466" width="112" height="16" rx="3" fill="rgba(0,212,170,0.06)" stroke="rgba(0,212,170,0.2)" stroke-width="0.5"/>
+      <text x="326" y="477" text-anchor="middle" fill="#7aaa90" font-size="9" font-family="DM Sans">78% · Approaching SG</text>
+    </g>
+
+    <!-- Vessel 2: HAPAG EXPRESS ~12% along route (just left SGN) -->
+    <g id="vessel2" style="cursor:pointer;display:none" onclick="selectVessel(2)">
+      <circle cx="250" cy="380" r="12" fill="none" stroke="rgba(79,172,254,0.4)" stroke-width="1">
+        <animate attributeName="r" values="10;20;10" dur="2.2s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="0.5;0;0.5" dur="2.2s" repeatCount="indefinite"/>
+      </circle>
+      <g filter="url(#glow2)">
+        <polygon points="250,370 261,378 257,388 243,388 239,378" fill="#051510" stroke="#4facfe" stroke-width="2" stroke-linejoin="round"/>
+        <circle cx="250" cy="379" r="5" fill="#4facfe" opacity="0.95"/>
+      </g>
+      <rect x="265" y="370" width="118" height="22" rx="5" fill="rgba(5,13,10,0.9)" stroke="rgba(79,172,254,0.4)" stroke-width="0.8"/>
+      <text x="324" y="383" text-anchor="middle" fill="#4facfe" font-size="10" font-weight="700" font-family="Syne">HAPAG EXPRESS</text>
+      <rect x="265" y="391" width="118" height="16" rx="3" fill="rgba(79,172,254,0.06)" stroke="rgba(79,172,254,0.2)" stroke-width="0.5"/>
+      <text x="324" y="402" text-anchor="middle" fill="#7aaa90" font-size="9" font-family="DM Sans">12% · Indian Ocean entry</text>
+    </g>
+
+    <!-- Port markers -->
+    <!-- SGN -->
+    <g filter="url(#glowS)" style="cursor:pointer">
+      <circle cx="285" cy="320" r="10" fill="#051510" stroke="#00ff88" stroke-width="2"/>
+      <circle cx="285" cy="320" r="5" fill="#00ff88" opacity="0.9"/>
+      <circle cx="285" cy="320" r="15" fill="transparent" stroke="#00ff88" stroke-width="0.8" opacity="0.3">
+        <animate attributeName="r" values="10;20;10" dur="3s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="0.4;0;0.4" dur="3s" repeatCount="indefinite"/>
+      </circle>
+    </g>
+    <text x="300" y="316" fill="#00ff88" font-size="10" font-weight="700" font-family="Syne">SGN</text>
+    <text x="300" y="328" fill="#4a7060" font-size="8.5" font-family="DM Sans">Cat Lai Port</text>
+
+    <!-- Singapore -->
+    <g style="cursor:pointer">
+      <circle cx="236" cy="498" r="7" fill="#051510" stroke="#00d4aa" stroke-width="1.8"/>
+      <circle cx="236" cy="498" r="3.5" fill="#00d4aa" opacity="0.85"/>
+    </g>
+    <text x="248" y="494" fill="#00d4aa" font-size="9" font-weight="700" font-family="Syne">SG</text>
+    <text x="248" y="505" fill="#4a7060" font-size="8" font-family="DM Sans">Singapore</text>
+
+    <!-- Osaka -->
+    <g style="cursor:pointer">
+      <circle cx="745" cy="110" r="8" fill="#051510" stroke="#4facfe" stroke-width="1.8"/>
+      <circle cx="745" cy="110" r="4" fill="#4facfe" opacity="0.85"/>
+    </g>
+    <text x="757" y="107" fill="#4facfe" font-size="9" font-weight="700" font-family="Syne">OSAKA</text>
+    <text x="757" y="118" fill="#4a7060" font-size="8" font-family="DM Sans">Japan 🇯🇵</text>
+
+    <!-- Rotterdam arrow off-screen -->
+    <text x="22" y="275" fill="#4facfe" font-size="8.5" font-style="italic" opacity="0.5" font-family="DM Sans">→ Rotterdam</text>
+
+    <!-- Straits labels -->
+    <text x="225" y="415" fill="#2a4a38" font-size="8" font-style="italic" font-family="DM Sans">Malacca Strait</text>
+    <text x="370" y="190" fill="#2a4a38" font-size="8" font-style="italic" font-family="DM Sans">South China Sea</text>
+    <text x="560" y="200" fill="#2a4a38" font-size="8" font-style="italic" font-family="DM Sans">Philippine Sea</text>
+
+    <!-- Scale -->
+    <line x1="30" y1="600" x2="130" y2="600" stroke="#2a4a38" stroke-width="1.2"/>
+    <text x="30" y="614" fill="#2a4a38" font-size="8" font-family="DM Sans">0</text>
+    <text x="105" y="614" fill="#2a4a38" font-size="8" font-family="DM Sans">500km</text>
+  </svg>
+
+  <!-- Controls -->
+  <div class="map-toolbar">
+    <button class="map-btn active" onclick="setView(0,this)">SITC BEIJING</button>
+    <button class="map-btn" onclick="setView(1,this)">PIL SINGAPORE</button>
+    <button class="map-btn" onclick="setView(2,this)">HAPAG EXPRESS</button>
+    <button class="map-btn" onclick="setView(-1,this)">All Routes</button>
+  </div>
+
+  <div class="sim-control">
+    <span class="sim-label">⏩ Sim speed:</span>
+    <select class="sim-select" onchange="setSimSpeed(this.value)">
+      <option value="1">1× Real</option>
+      <option value="5" selected>5× Fast</option>
+      <option value="20">20× Hyper</option>
+    </select>
+  </div>
+
+  <!-- Info panel (vessel details) -->
+  <div class="map-info-panel" id="infoPanelV">
+    <div class="mip-title">
+      <span style="width:8px;height:8px;background:#00ff88;border-radius:50%;flex-shrink:0;animation:pulse 2s infinite;display:inline-block"></span>
+      SITC BEIJING — Live Position
+    </div>
+    <div class="mip-row"><span class="mk">Position</span><span class="mv" id="infoPos">15.2°N 115.8°E</span></div>
+    <div class="mip-row"><span class="mk">Speed</span><span class="mv" id="infoSpeed">14.2 kn</span></div>
+    <div class="mip-row"><span class="mk">Heading</span><span class="mv" id="infoHead">NE 52°</span></div>
+    <div class="mip-row"><span class="mk">Distance sailed</span><span class="mv" id="infoDist">1,247 nm</span></div>
+    <div class="mip-row"><span class="mk">Remaining</span><span class="mv" id="infoRemain">1,403 nm</span></div>
+    <div class="mip-row"><span class="mk">Reefer temp</span><span class="mv" style="color:#00ff88" id="infoTemp">-22.4°C ✓</span></div>
+    <div class="mip-row"><span class="mk">CO₂ this leg</span><span class="mv" style="color:#00d4aa" id="infoCO2">387 kg</span></div>
+  </div>
+
+  <!-- Speed badge -->
+  <div class="speed-badge">
+    <div><div class="speed-val" id="speedVal">14.2</div><div class="speed-unit">knots<br>current</div></div>
+    <div style="width:1px;height:28px;background:var(--brd)"></div>
+    <div><div class="speed-val" style="color:var(--am);font-size:1rem" id="headingVal">NE 52°</div><div class="speed-unit">heading</div></div>
+  </div>
+
+  <!-- ETA banner -->
+  <div class="eta-banner">
+    <div class="eta-item"><div class="eta-val" id="etaDays">3d 14h</div><div class="eta-lbl">Time remaining</div></div>
+    <div class="eta-sep"></div>
+    <div class="eta-item"><div class="eta-val" id="etaDate">Jun 08</div><div class="eta-lbl">ETA destination</div></div>
+    <div class="eta-sep"></div>
+    <div class="eta-item"><div class="eta-val" id="etaStatus" style="color:#00ff88">On Time ✓</div><div class="eta-lbl">Status</div></div>
+    <div class="eta-sep"></div>
+    <div class="eta-item"><div class="eta-val" id="etaCO2" style="color:#00d4aa">387kg</div><div class="eta-lbl">CO₂ emitted</div></div>
+  </div>
+
+  <!-- Legend -->
+  <div class="map-legend">
+    <div class="li"><div class="ld" style="background:#00ff88"></div>Active vessel</div>
+    <div class="li"><div class="ld" style="background:#00d4aa"></div>Near destination</div>
+    <div class="li"><div class="ld" style="background:#4facfe"></div>Long haul</div>
+    <div class="li"><div class="ld" style="background:#2a4a38;border:1px dashed #00804a"></div>Planned route</div>
+  </div>
+</div>
+</div>
+
+<script>
+const vessels = [
+  {
+    id:0, name:"SITC BEIJING", color:"#00ff88",
+    progress:46, maxProgress:100,
+    speed:14.2, heading:"NE 52°",
+    pos:"15.2°N 115.8°E",
+    dist:1247, remain:1403,
+    temp:"-22.4°C ✓", co2:387,
+    eta:"Jun 08", etaDays:"3d 14h", status:"On Time ✓",
+    routeEl:"route0", vesselEl:"vessel0",
+  },
+  {
+    id:1, name:"PIL SINGAPORE", color:"#00d4aa",
+    progress:78, maxProgress:100,
+    speed:12.8, heading:"S 175°",
+    pos:"2.1°N 104.2°E",
+    dist:392, remain:110,
+    temp:"+9.8°C ✓", co2:62,
+    eta:"Jun 03", etaDays:"0d 8h", status:"Approaching ✓",
+    routeEl:"route1", vesselEl:"vessel1",
+  },
+  {
+    id:2, name:"HAPAG EXPRESS", color:"#4facfe",
+    progress:12, maxProgress:100,
+    speed:16.1, heading:"SW 210°",
+    pos:"6.8°N 101.5°E",
+    dist:380, remain:11220,
+    temp:"+18.1°C ✓", co2:48,
+    eta:"Jun 30", etaDays:"24d 6h", status:"On Schedule",
+    routeEl:"route2", vesselEl:"vessel2",
+  }
+];
+
+let currentVessel = 0;
+let simSpeed = 5;
+let animFrame;
+
+// Vessel path waypoints (SVG coords)
+const waypoints = [
+  // Vessel 0: SGN → Osaka
+  [{x:285,y:320},{x:330,y:295},{x:390,y:255},{x:440,y:215},{x:490,y:185},{x:545,y:160},{x:600,y:140},{x:660,y:125},{x:710,y:115},{x:745,y:110}],
+  // Vessel 1: SGN → Singapore
+  [{x:285,y:320},{x:272,y:350},{x:260,y:395},{x:252,y:440},{x:248,y:490},{x:244,y:498}],
+  // Vessel 2: SGN → Rotterdam (partial shown)
+  [{x:285,y:320},{x:265,y:355},{x:250,y:390},{x:240,y:430},{x:225,y:465},{x:200,y:490},{x:160,y:505},{x:115,y:488},{x:70,y:455},{x:35,y:415},{x:18,y:370},{x:20,y:320}],
+];
+
+function getPositionOnPath(pts, pct) {
+  const t = pct / 100;
+  const totalSeg = pts.length - 1;
+  const seg = Math.min(Math.floor(t * totalSeg), totalSeg - 1);
+  const localT = t * totalSeg - seg;
+  const a = pts[seg], b = pts[seg + 1];
+  return { x: a.x + (b.x - a.x) * localT, y: a.y + (b.y - a.y) * localT };
+}
+
+function getAngle(pts, pct) {
+  const t = pct / 100;
+  const totalSeg = pts.length - 1;
+  const seg = Math.min(Math.floor(t * totalSeg), totalSeg - 1);
+  const a = pts[seg], b = pts[Math.min(seg+1, pts.length-1)];
+  return Math.atan2(b.y - a.y, b.x - a.x) * 180 / Math.PI;
+}
+
+function moveVesselEl(vIdx) {
+  const v = vessels[vIdx];
+  const pos = getPositionOnPath(waypoints[vIdx], v.progress);
+  const angle = getAngle(waypoints[vIdx], v.progress);
+  const el = document.getElementById(v.vesselEl);
+  if (!el) return;
+  // Move vessel group by setting a transform
+  const cx = pos.x, cy = pos.y;
+  el.setAttribute('transform', `translate(${cx - (vIdx===0?510:vIdx===1?255:250)},${cy - (vIdx===0?175:vIdx===1?455:380)})`);
+}
+
+function selectVessel(idx) {
+  if (idx < 0) { showAllVessels(); return; }
+  currentVessel = idx;
+  const v = vessels[idx];
+  // Update sidebar active state
+  document.querySelectorAll('.booking-card').forEach((c,i) => c.classList.toggle('active', i===idx));
+  // Show/hide vessel elements
+  vessels.forEach((vv, i) => {
+    const el = document.getElementById(vv.vesselEl);
+    if (el) el.style.display = i===idx ? '' : 'none';
+  });
+  // Update info panel
+  document.querySelector('.mip-title').innerHTML = `<span style="width:8px;height:8px;background:${v.color};border-radius:50%;flex-shrink:0;animation:blink 1s infinite;display:inline-block"></span> ${v.name} — Live`;
+  document.getElementById('infoPos').textContent = v.pos;
+  document.getElementById('infoSpeed').textContent = v.speed + ' kn';
+  document.getElementById('infoHead').textContent = v.heading;
+  document.getElementById('infoDist').textContent = v.dist.toLocaleString() + ' nm';
+  document.getElementById('infoRemain').textContent = v.remain.toLocaleString() + ' nm';
+  document.getElementById('infoTemp').textContent = v.temp;
+  document.getElementById('infoCO2').textContent = v.co2 + ' kg';
+  // Update ETA
+  document.getElementById('etaDays').textContent = v.etaDays;
+  document.getElementById('etaDate').textContent = v.eta;
+  document.getElementById('etaStatus').textContent = v.status;
+  document.getElementById('etaCO2').textContent = v.co2 + 'kg';
+  document.getElementById('speedVal').textContent = v.speed.toFixed(1);
+  document.getElementById('headingVal').textContent = v.heading;
+}
+
+function showAllVessels() {
+  vessels.forEach(v => {
+    const el = document.getElementById(v.vesselEl);
+    if (el) el.style.display = '';
+  });
+}
+
+function setView(idx, btn) {
+  document.querySelectorAll('.map-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  selectVessel(idx);
+}
+
+function setSimSpeed(v) { simSpeed = parseInt(v); }
+
+// Animate vessel movement
+let lastTime = 0;
+function animate(ts) {
+  if (ts - lastTime > 800 / simSpeed) {
+    lastTime = ts;
+    vessels.forEach((v, idx) => {
+      // Advance progress slightly
+      v.progress = Math.min(100, v.progress + (0.08 * simSpeed * 0.2));
+      if (v.progress >= 100) v.progress = 0; // loop for demo
+      moveVesselEl(idx);
+      // Update telemetry with slight noise
+      v.speed = parseFloat((v.speed + (Math.random() - 0.5) * 0.3).toFixed(1));
+      v.speed = Math.max(10, Math.min(20, v.speed));
+      v.co2 = Math.round(v.co2 + simSpeed * 0.05);
+    });
+    // Update displayed values if this is current vessel
+    const v = vessels[currentVessel];
+    if (document.getElementById('speedVal')) {
+      document.getElementById('speedVal').textContent = v.speed.toFixed(1);
+      document.getElementById('etaCO2').textContent = v.co2 + 'kg';
+      document.getElementById('infoCO2').textContent = v.co2 + ' kg';
+      document.getElementById('infoSpeed').textContent = v.speed + ' kn';
+    }
+    // Reefer temp slight fluctuation
+    if (currentVessel === 0) {
+      const t = (-22 + (Math.random() - 0.5) * 0.4).toFixed(1);
+      const el = document.getElementById('temp0');
+      if (el) el.textContent = t + '°C';
+      if (document.getElementById('infoTemp')) document.getElementById('infoTemp').textContent = t + '°C ✓';
+    }
+    // Progress bars
+    const pf = document.getElementById('pfill0');
+    const pt = document.getElementById('pct0');
+    if (pf) { pf.style.width = vessels[0].progress.toFixed(0) + '%'; }
+    if (pt) { pt.textContent = vessels[0].progress.toFixed(0) + '%'; }
+  }
+  animFrame = requestAnimationFrame(animate);
+}
+
+// Initialize
+selectVessel(0);
+requestAnimationFrame(animate);
+</script>
